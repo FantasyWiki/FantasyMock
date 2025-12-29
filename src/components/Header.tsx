@@ -1,11 +1,15 @@
-import { Menu, X, BookOpen, Trophy, Users, Search, LayoutDashboard } from "lucide-react";
+import { Menu, X, BookOpen, Trophy, Users, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSelector } from "./LanguageSelector";
 
-export function Header() {
+interface HeaderProps {
+  onSignInClick?: () => void;
+}
+
+export function Header({ onSignInClick }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -59,7 +63,12 @@ export function Header() {
           <div className="flex items-center gap-2">
             <LanguageSelector />
             <ThemeToggle />
-            <Button variant="default" size="sm" className="hidden sm:flex">
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="hidden sm:flex"
+              onClick={onSignInClick}
+            >
               Sign In
             </Button>
             <Button
@@ -101,7 +110,14 @@ export function Header() {
                 )
               )}
               <div className="pt-2 px-4">
-                <Button variant="default" className="w-full">
+                <Button 
+                  variant="default" 
+                  className="w-full"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onSignInClick?.();
+                  }}
+                >
                   Sign In
                 </Button>
               </div>
