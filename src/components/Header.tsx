@@ -12,12 +12,22 @@ interface HeaderProps {
 export function Header({ onSignInClick }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // TODO: Replace with actual auth check
+  const isAuthenticated = false;
+
   const navLinks = [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, isRoute: true },
-    { name: "How It Works", href: "#how-it-works", icon: BookOpen, isRoute: false },
-    { name: "Leagues", href: "#leagues", icon: Trophy, isRoute: false },
-    { name: "Community", href: "#community", icon: Users, isRoute: false },
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, isRoute: true, requiresAuth: true },
+    { name: "How It Works", href: "#how-it-works", icon: BookOpen, isRoute: false, requiresAuth: false },
+    { name: "Leagues", href: "#leagues", icon: Trophy, isRoute: false, requiresAuth: false },
+    { name: "Community", href: "#community", icon: Users, isRoute: false, requiresAuth: false },
   ];
+
+  const handleNavClick = (link: typeof navLinks[0], e: React.MouseEvent) => {
+    if (link.requiresAuth && !isAuthenticated) {
+      e.preventDefault();
+      onSignInClick?.();
+    }
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -41,6 +51,7 @@ export function Header({ onSignInClick }: HeaderProps) {
                 <Link
                   key={link.name}
                   to={link.href}
+                  onClick={(e) => handleNavClick(link, e)}
                   className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
                 >
                   <link.icon className="h-4 w-4" />
@@ -91,8 +102,13 @@ export function Header({ onSignInClick }: HeaderProps) {
                   <Link
                     key={link.name}
                     to={link.href}
+                    onClick={(e) => {
+                      handleNavClick(link, e);
+                      if (!link.requiresAuth || isAuthenticated) {
+                        setMobileMenuOpen(false);
+                      }
+                    }}
                     className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-secondary hover:text-primary transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
                   >
                     <link.icon className="h-5 w-5" />
                     {link.name}
