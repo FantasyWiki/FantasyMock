@@ -2,7 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FileText, TrendingUp, TrendingDown, Clock, RotateCcw, DollarSign } from "lucide-react";
+import { FileText, TrendingUp, TrendingDown, Clock, RotateCcw, DollarSign, Plus } from "lucide-react";
+
+interface OwnedArticlesProps {
+  onBuyArticles?: () => void;
+}
 
 // Mock data - replace with real data
 const ownedArticles = [
@@ -81,7 +85,7 @@ const getTierBadge = (tier: string) => {
   }
 };
 
-export const OwnedArticles = () => {
+export const OwnedArticles = ({ onBuyArticles }: OwnedArticlesProps) => {
   return (
     <Card className="bg-card border-border">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -94,6 +98,17 @@ export const OwnedArticles = () => {
             <p className="text-sm text-muted-foreground">{ownedArticles.length} active contracts</p>
           </div>
         </div>
+        {onBuyArticles && (
+          <Button
+            onClick={onBuyArticles}
+            variant="outline"
+            size="sm"
+            className="gap-2 border-primary text-primary hover:bg-primary/10"
+          >
+            <Plus className="h-4 w-4" />
+            Buy More
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
