@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, TrendingUp, TrendingDown, ArrowLeft, User, Calendar, ShoppingCart } from "lucide-react";
 import { ContractPurchaseDialog } from "@/components/market/ContractPurchaseDialog";
 import { ArticleContractDialog } from "@/components/market/ArticleContractDialog";
@@ -130,8 +129,8 @@ const userBalance = 550;
 
 const calculateTrendMultiplier = (viewsLast7d: number, viewsPrev7d: number): number => {
   const ratio = viewsLast7d / viewsPrev7d;
-  if (ratio > 1.2) return 1.15; // upturn boost
-  if (ratio < 0.8) return 0.85; // downturn discount
+  if (ratio > 1.2) return 1.15;
+  if (ratio < 0.8) return 0.85;
   return 1.0;
 };
 
@@ -166,201 +165,154 @@ const Market = () => {
     );
   }, [searchQuery]);
 
-  const handleBuyClick = (article: typeof mockArticles[0]) => {
+  const handleArticleClick = (article: typeof mockArticles[0]) => {
     setSelectedArticle(article);
-    setShowPurchaseDialog(true);
-  };
-
-  const handleViewContract = (article: typeof mockArticles[0]) => {
-    setSelectedArticle(article);
-    setShowContractDialog(true);
+    if (article.owner) {
+      setShowContractDialog(true);
+    } else {
+      setShowPurchaseDialog(true);
+    }
   };
 
   const handlePurchaseComplete = () => {
     setShowPurchaseDialog(false);
     setSelectedArticle(null);
-    // Here you would refresh the data or update state
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto px-4 py-8 pt-24">
+      <main className="container mx-auto px-4 py-6 pt-20 md:pt-24">
         {/* Back Button & Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <Button
             variant="ghost"
+            size="sm"
             onClick={() => navigate("/dashboard")}
-            className="mb-4 text-muted-foreground hover:text-foreground"
+            className="mb-3 text-muted-foreground hover:text-foreground -ml-2"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Dashboard
           </Button>
           
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl md:text-4xl font-bold text-foreground truncate">
                 Article Market
               </h1>
-              <p className="text-muted-foreground">
-                Search and purchase Wikipedia articles for your team
+              <p className="text-sm text-muted-foreground hidden sm:block">
+                Search and purchase Wikipedia articles
               </p>
             </div>
-            <div className="flex items-center gap-2 bg-card px-4 py-2 rounded-lg border border-border">
-              <span className="text-sm text-muted-foreground">Balance:</span>
-              <span className="text-lg font-bold text-primary">{userBalance} Cr</span>
+            <div className="flex items-center gap-1.5 bg-card px-3 py-1.5 rounded-lg border border-border shrink-0">
+              <span className="text-xs text-muted-foreground hidden sm:inline">Balance:</span>
+              <span className="text-base font-bold text-primary">{userBalance} Cr</span>
             </div>
           </div>
         </div>
 
         {/* Search Section */}
-        <Card className="mb-8 bg-card border-border">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5 text-primary" />
-              Search Articles
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Type article name..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-background border-border"
-                />
-              </div>
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                <Search className="h-4 w-4 mr-2" />
-                Search
-              </Button>
-            </div>
-            
-            {/* Suggestions */}
-            {searchQuery && (
-              <div className="mt-4">
-                <p className="text-sm text-muted-foreground mb-2">
-                  Showing {filteredArticles.length} results for "{searchQuery}"
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <div className="mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search articles..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 bg-card border-border h-12"
+            />
+          </div>
+          
+          {searchQuery && (
+            <p className="text-sm text-muted-foreground mt-2">
+              {filteredArticles.length} result{filteredArticles.length !== 1 ? "s" : ""} for "{searchQuery}"
+            </p>
+          )}
+        </div>
 
-        {/* Results Table */}
-        <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5 text-primary" />
-              Available Articles
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-border">
-                    <TableHead className="text-muted-foreground">Article</TableHead>
-                    <TableHead className="text-muted-foreground text-right">Performance</TableHead>
-                    <TableHead className="text-muted-foreground text-right">Price</TableHead>
-                    <TableHead className="text-muted-foreground">Owner</TableHead>
-                    <TableHead className="text-muted-foreground">Expires</TableHead>
-                    <TableHead className="text-muted-foreground text-right">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredArticles.map((article) => {
-                    const trendMultiplier = calculateTrendMultiplier(article.viewsLast7d, article.viewsPrev7d);
-                    const rarityMultiplier = calculateRarityMultiplier(article.views30d);
-                    const adjustedPrice = Math.round(article.basePrice * trendMultiplier * rarityMultiplier);
-                    const daysUntilExpiry = getDaysUntilExpiry(article.expiresAt);
+        {/* Results - Mobile Card View */}
+        <div className="space-y-3">
+          {filteredArticles.map((article) => {
+            const trendMultiplier = calculateTrendMultiplier(article.viewsLast7d, article.viewsPrev7d);
+            const rarityMultiplier = calculateRarityMultiplier(article.views30d);
+            const adjustedPrice = Math.round(article.basePrice * trendMultiplier * rarityMultiplier);
+            const daysUntilExpiry = getDaysUntilExpiry(article.expiresAt);
+            const isFreeAgent = !article.owner;
 
-                    return (
-                      <TableRow key={article.id} className="border-border hover:bg-muted/50 transition-colors">
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-foreground">{article.title}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <span className="text-foreground">{formatViews(article.views30d)}</span>
-                            {article.trend === "up" ? (
-                              <Badge variant="outline" className="text-xs border-primary text-primary">
-                                <TrendingUp className="h-3 w-3 mr-1" />
-                                Up
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className="text-xs border-destructive text-destructive">
-                                <TrendingDown className="h-3 w-3 mr-1" />
-                                Down
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <span className="font-semibold text-foreground">{adjustedPrice} Cr</span>
-                        </TableCell>
-                        <TableCell>
-                          {article.owner ? (
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-muted-foreground">{article.owner.teamName}</span>
-                            </div>
-                          ) : (
-                            <Badge variant="secondary" className="text-xs">
-                              Free Agent
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {article.owner && daysUntilExpiry !== null ? (
-                            <div className="flex items-center gap-1 text-muted-foreground">
-                              <Calendar className="h-4 w-4" />
-                              <span>{daysUntilExpiry}d</span>
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground">—</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {article.owner ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleViewContract(article)}
-                              className="border-border text-muted-foreground hover:text-foreground"
-                            >
-                              View Contract
-                            </Button>
-                          ) : (
-                            <Button
-                              size="sm"
-                              onClick={() => handleBuyClick(article)}
-                              className="bg-primary text-primary-foreground hover:bg-primary/90"
-                            >
-                              Buy
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
+            return (
+              <Card
+                key={article.id}
+                className={`bg-card border-border cursor-pointer transition-all active:scale-[0.98] hover:shadow-md ${
+                  isFreeAgent ? "hover:border-primary/50" : "hover:border-border"
+                }`}
+                onClick={() => handleArticleClick(article)}
+              >
+                <CardContent className="p-4">
+                  {/* Top Row: Title + Status Badge */}
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <h3 className="font-semibold text-foreground text-lg leading-tight">
+                      {article.title}
+                    </h3>
+                    {isFreeAgent ? (
+                      <Badge className="bg-primary/10 text-primary hover:bg-primary/10 shrink-0">
+                        Free Agent
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="shrink-0">
+                        Owned
+                      </Badge>
+                    )}
+                  </div>
 
-            {filteredArticles.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No articles found matching "{searchQuery}"</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  {/* Bottom Row: Stats */}
+                  <div className="flex items-center justify-between gap-2 text-sm">
+                    <div className="flex items-center gap-3">
+                      {/* Views */}
+                      <span className="text-muted-foreground">
+                        {formatViews(article.views30d)} views
+                      </span>
+                      
+                      {/* Trend */}
+                      <div className={`flex items-center gap-0.5 ${
+                        article.trend === "up" ? "text-primary" : "text-destructive"
+                      }`}>
+                        {article.trend === "up" ? (
+                          <TrendingUp className="h-3.5 w-3.5" />
+                        ) : (
+                          <TrendingDown className="h-3.5 w-3.5" />
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      {/* Owner info or Price */}
+                      {article.owner ? (
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <User className="h-3.5 w-3.5" />
+                          <span className="truncate max-w-[100px]">{article.owner.teamName}</span>
+                          {daysUntilExpiry !== null && (
+                            <span className="text-xs">• {daysUntilExpiry}d</span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="font-bold text-primary">{adjustedPrice} Cr</span>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {filteredArticles.length === 0 && (
+          <div className="text-center py-12">
+            <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+            <p className="text-muted-foreground">No articles found matching "{searchQuery}"</p>
+          </div>
+        )}
       </main>
 
       <Footer />
