@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +9,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, User, Calendar, Clock, FileText } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TrendingUp, TrendingDown, User, Calendar, Clock, FileText, ArrowLeftRight, Coins, Send } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface ArticleOwner {
   name: string;
@@ -57,122 +62,264 @@ const formatDate = (date: Date): string => {
   });
 };
 
+// Mock owned articles for trade proposal
+const mockOwnedArticles = [
+  { id: 101, title: "Albert Einstein", basePrice: 850 },
+  { id: 102, title: "World War II", basePrice: 1200 },
+  { id: 103, title: "Solar System", basePrice: 650 },
+];
+
 export const ArticleContractDialog = ({
   open,
   onOpenChange,
   article,
 }: ArticleContractDialogProps) => {
+  const [showTradePanel, setShowTradePanel] = useState(false);
+  const [tradeType, setTradeType] = useState<"article" | "credits">("article");
+  const [selectedArticleId, setSelectedArticleId] = useState<number | null>(null);
+  const [creditOffer, setCreditOffer] = useState("");
+
   const percentChange = getPercentageChange(article.viewsLast7d, article.viewsPrev7d);
   const daysUntilExpiry = getDaysUntilExpiry(article.expiresAt);
 
+  const handleProposeTrade = () => {
+    if (tradeType === "article" && !selectedArticleId) {
+      toast({
+        title: "Select an article",
+        description: "Please select an article to offer in trade.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (tradeType === "credits" && (!creditOffer || parseInt(creditOffer) <= 0)) {
+      toast({
+        title: "Enter credit amount",
+        description: "Please enter a valid credit amount.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const offerDetails = tradeType === "article" 
+      ? mockOwnedArticles.find(a => a.id === selectedArticleId)?.title
+      : `${creditOffer} credits`;
+
+    toast({
+      title: "Trade Proposed!",
+      description: `Your offer of ${offerDetails} for "${article.title}" has been sent to ${article.owner?.name}.`,
+    });
+    
+    setShowTradePanel(false);
+    setSelectedArticleId(null);
+    setCreditOffer("");
+    onOpenChange(false);
+  };
+
+  const resetTradePanel = () => {
+    setShowTradePanel(false);
+    setSelectedArticleId(null);
+    setCreditOffer("");
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-card border-border">
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      if (!isOpen) resetTradePanel();
+      onOpenChange(isOpen);
+    }}>
+      <DialogContent className="sm:max-w-md bg-card border-border max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-serif flex items-center gap-2">
-            <FileText className="h-6 w-6 text-primary" />
-            Contract Details
+          <DialogTitle className="text-xl font-serif flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
+            {showTradePanel ? "Propose Trade" : "Contract Details"}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            This article is currently under contract
+            {showTradePanel 
+              ? `Offer a trade for "${article.title}"`
+              : "This article is currently under contract"
+            }
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          {/* Article Info */}
-          <div className="text-center">
-            <h3 className="text-xl font-semibold text-foreground">{article.title}</h3>
-            <Badge 
-              variant="outline" 
-              className={`mt-2 ${article.trend === "up" ? "border-primary text-primary" : "border-destructive text-destructive"}`}
-            >
-              {article.trend === "up" ? (
-                <TrendingUp className="h-3 w-3 mr-1" />
-              ) : (
-                <TrendingDown className="h-3 w-3 mr-1" />
-              )}
-              {percentChange >= 0 ? "+" : ""}{percentChange.toFixed(1)}% this week
-            </Badge>
-          </div>
+        {!showTradePanel ? (
+          <div className="space-y-4 py-2">
+            {/* Article Info */}
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-foreground">{article.title}</h3>
+              <Badge 
+                variant="outline" 
+                className={`mt-2 ${article.trend === "up" ? "border-primary text-primary" : "border-destructive text-destructive"}`}
+              >
+                {article.trend === "up" ? (
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                ) : (
+                  <TrendingDown className="h-3 w-3 mr-1" />
+                )}
+                {percentChange >= 0 ? "+" : ""}{percentChange.toFixed(1)}% this week
+              </Badge>
+            </div>
 
-          {/* Owner Information */}
-          {article.owner && (
-            <Card className="bg-muted/50 border-border">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
-                    <User className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-foreground">{article.owner.teamName}</p>
-                    <p className="text-sm text-muted-foreground">Owned by {article.owner.name}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Contract Expiration */}
-          {article.expiresAt && daysUntilExpiry !== null && (
-            <Card className="bg-muted/50 border-border">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-muted-foreground" />
-                    <span className="text-muted-foreground">Contract Expires</span>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-foreground">{formatDate(article.expiresAt)}</p>
-                    <div className={`flex items-center gap-1 text-sm ${daysUntilExpiry <= 2 ? "text-destructive" : "text-muted-foreground"}`}>
-                      <Clock className="h-3 w-3" />
-                      <span>{daysUntilExpiry} days remaining</span>
+            {/* Owner Information */}
+            {article.owner && (
+              <Card className="bg-muted/50 border-border">
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                      <User className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-foreground truncate">{article.owner.teamName}</p>
+                      <p className="text-sm text-muted-foreground truncate">Owned by {article.owner.name}</p>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                </CardContent>
+              </Card>
+            )}
 
-          {/* Performance Stats */}
-          <div>
-            <h4 className="text-sm font-medium text-muted-foreground mb-3">Last Month Performance</h4>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-3 bg-muted/30 rounded-lg">
-                <p className="text-xs text-muted-foreground">Views (30d)</p>
-                <p className="font-semibold text-foreground">{formatViews(article.views30d)}</p>
-              </div>
-              <div className="text-center p-3 bg-muted/30 rounded-lg">
-                <p className="text-xs text-muted-foreground">This Week</p>
-                <p className="font-semibold text-foreground">{formatViews(article.viewsLast7d)}</p>
-              </div>
-              <div className="text-center p-3 bg-muted/30 rounded-lg">
-                <p className="text-xs text-muted-foreground">Prev Week</p>
-                <p className="font-semibold text-foreground">{formatViews(article.viewsPrev7d)}</p>
+            {/* Contract Expiration */}
+            {article.expiresAt && daysUntilExpiry !== null && (
+              <Card className="bg-muted/50 border-border">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="text-sm text-muted-foreground">Expires</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-foreground text-sm">{formatDate(article.expiresAt)}</p>
+                      <div className={`flex items-center justify-end gap-1 text-xs ${daysUntilExpiry <= 2 ? "text-destructive" : "text-muted-foreground"}`}>
+                        <Clock className="h-3 w-3" />
+                        <span>{daysUntilExpiry}d left</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Performance Stats */}
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground mb-2">Last Month Performance</h4>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-center p-2 bg-muted/30 rounded-lg">
+                  <p className="text-xs text-muted-foreground">30d</p>
+                  <p className="font-semibold text-foreground text-sm">{formatViews(article.views30d)}</p>
+                </div>
+                <div className="text-center p-2 bg-muted/30 rounded-lg">
+                  <p className="text-xs text-muted-foreground">This Wk</p>
+                  <p className="font-semibold text-foreground text-sm">{formatViews(article.viewsLast7d)}</p>
+                </div>
+                <div className="text-center p-2 bg-muted/30 rounded-lg">
+                  <p className="text-xs text-muted-foreground">Prev Wk</p>
+                  <p className="font-semibold text-foreground text-sm">{formatViews(article.viewsPrev7d)}</p>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Info Message */}
-          <div className="bg-accent/50 p-4 rounded-lg">
-            <p className="text-sm text-accent-foreground">
-              This article will become available as a free agent when the current contract expires.
-              {daysUntilExpiry !== null && daysUntilExpiry <= 3 && (
-                <span className="block mt-1 font-medium text-primary">
-                  Check back in {daysUntilExpiry} day{daysUntilExpiry !== 1 ? "s" : ""}!
-                </span>
-              )}
-            </p>
+            {/* Trade Proposal CTA */}
+            <div className="space-y-2 pt-2">
+              <Button
+                onClick={() => setShowTradePanel(true)}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                <ArrowLeftRight className="h-4 w-4 mr-2" />
+                Propose a Trade
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="w-full"
+              >
+                Close
+              </Button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="space-y-4 py-2">
+            {/* Trade Type Tabs */}
+            <Tabs value={tradeType} onValueChange={(v) => setTradeType(v as "article" | "credits")}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="article" className="flex items-center gap-2">
+                  <ArrowLeftRight className="h-4 w-4" />
+                  <span className="hidden xs:inline">Trade</span> Article
+                </TabsTrigger>
+                <TabsTrigger value="credits" className="flex items-center gap-2">
+                  <Coins className="h-4 w-4" />
+                  <span className="hidden xs:inline">Offer</span> Credits
+                </TabsTrigger>
+              </TabsList>
 
-        <div className="flex justify-end">
-          <Button
-            onClick={() => onOpenChange(false)}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            Close
-          </Button>
-        </div>
+              <TabsContent value="article" className="space-y-3 mt-4">
+                <Label className="text-sm text-muted-foreground">Select an article to offer:</Label>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {mockOwnedArticles.map((ownedArticle) => (
+                    <Card 
+                      key={ownedArticle.id}
+                      className={`cursor-pointer transition-all ${
+                        selectedArticleId === ownedArticle.id 
+                          ? "border-primary bg-primary/10" 
+                          : "border-border hover:border-primary/50"
+                      }`}
+                      onClick={() => setSelectedArticleId(ownedArticle.id)}
+                    >
+                      <CardContent className="p-3 flex items-center justify-between">
+                        <span className="font-medium text-foreground">{ownedArticle.title}</span>
+                        <Badge variant="secondary" className="text-xs">
+                          {ownedArticle.basePrice} credits
+                        </Badge>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                {mockOwnedArticles.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    You don't own any articles to trade.
+                  </p>
+                )}
+              </TabsContent>
+
+              <TabsContent value="credits" className="space-y-3 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="creditOffer" className="text-sm text-muted-foreground">
+                    Credit amount to offer:
+                  </Label>
+                  <div className="relative">
+                    <Coins className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="creditOffer"
+                      type="number"
+                      placeholder="Enter amount"
+                      value={creditOffer}
+                      onChange={(e) => setCreditOffer(e.target.value)}
+                      className="pl-10"
+                      min="1"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Suggested: {Math.round(article.basePrice * 0.8)} - {Math.round(article.basePrice * 1.2)} credits
+                  </p>
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-2 pt-2">
+              <Button
+                onClick={handleProposeTrade}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                <Send className="h-4 w-4 mr-2" />
+                Send Trade Proposal
+              </Button>
+              <Button
+                variant="outline"
+                onClick={resetTradePanel}
+                className="w-full"
+              >
+                Back
+              </Button>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
