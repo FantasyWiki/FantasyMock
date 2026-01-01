@@ -5,6 +5,7 @@ import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { OwnedArticles } from "@/components/dashboard/OwnedArticles";
 import { LeagueLeaderboard } from "@/components/dashboard/LeagueLeaderboard";
 import { TeamPortfolio } from "@/components/dashboard/TeamPortfolio";
+import { TradeInbox } from "@/components/market/TradeInbox";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Plus } from "lucide-react";
 
@@ -26,13 +27,16 @@ const Dashboard = () => {
               Manage your team, track performance, and climb the leaderboard
             </p>
           </div>
-          <Button
-            onClick={() => navigate("/market")}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
-          >
-            <ShoppingCart className="h-4 w-4" />
-            Buy Articles
-          </Button>
+          <div className="flex items-center gap-2">
+            <TradeInbox />
+            <Button
+              onClick={() => navigate("/market")}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              Buy Articles
+            </Button>
+          </div>
         </div>
 
         {/* Summary Cards */}
