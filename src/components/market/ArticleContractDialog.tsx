@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { TrendingUp, TrendingDown, User, Calendar, Clock, FileText, ArrowLeftRight, Coins, Send } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -37,6 +38,12 @@ interface ArticleContractDialogProps {
   onOpenChange: (open: boolean) => void;
   article: Article;
 }
+
+const CONTRACT_TIERS = [
+  { id: "1week", label: "1 Week", multiplier: 1, description: "Short-term contract" },
+  { id: "2weeks", label: "2 Weeks", multiplier: 1.8, description: "Standard contract" },
+  { id: "1month", label: "1 Month", multiplier: 3.2, description: "Long-term commitment" },
+];
 
 const formatViews = (views: number): string => {
   if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`;
@@ -78,9 +85,12 @@ export const ArticleContractDialog = ({
   const [tradeType, setTradeType] = useState<"article" | "credits">("article");
   const [selectedArticleId, setSelectedArticleId] = useState<number | null>(null);
   const [creditOffer, setCreditOffer] = useState("");
+  const [selectedTier, setSelectedTier] = useState("1week");
 
   const percentChange = getPercentageChange(article.viewsLast7d, article.viewsPrev7d);
   const daysUntilExpiry = getDaysUntilExpiry(article.expiresAt);
+
+  const selectedTierData = CONTRACT_TIERS.find(t => t.id === selectedTier);
 
   const handleProposeTrade = () => {
     if (tradeType === "article" && !selectedArticleId) {
@@ -106,12 +116,13 @@ export const ArticleContractDialog = ({
 
     toast({
       title: "Trade Proposed!",
-      description: `Your offer of ${offerDetails} for "${article.title}" has been sent to ${article.owner?.name}.`,
+      description: `Your offer of ${offerDetails} for "${article.title}" (${selectedTierData?.label} contract) has been sent to ${article.owner?.name}.`,
     });
     
     setShowTradePanel(false);
     setSelectedArticleId(null);
     setCreditOffer("");
+    setSelectedTier("1week");
     onOpenChange(false);
   };
 
@@ -119,6 +130,7 @@ export const ArticleContractDialog = ({
     setShowTradePanel(false);
     setSelectedArticleId(null);
     setCreditOffer("");
+    setSelectedTier("1week");
   };
 
   return (
@@ -250,7 +262,7 @@ export const ArticleContractDialog = ({
 
               <TabsContent value="article" className="space-y-3 mt-4">
                 <Label className="text-sm text-muted-foreground">Select an article to offer:</Label>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
+                <div className="space-y-2 max-h-36 overflow-y-auto">
                   {mockOwnedArticles.map((ownedArticle) => (
                     <Card 
                       key={ownedArticle.id}
@@ -300,6 +312,41 @@ export const ArticleContractDialog = ({
                 </div>
               </TabsContent>
             </Tabs>
+
+            {/* Contract Tier Selection */}
+            <div className="space-y-3">
+              <Label className="text-sm text-muted-foreground">Contract Length:</Label>
+              <RadioGroup
+                value={selectedTier}
+                onValueChange={setSelectedTier}
+                className="space-y-2"
+              >
+                {CONTRACT_TIERS.map((tier) => (
+                  <div
+                    key={tier.id}
+                    className={`flex items-center space-x-3 p-3 rounded-lg border transition-all cursor-pointer ${
+                      selectedTier === tier.id
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                    onClick={() => setSelectedTier(tier.id)}
+                  >
+                    <RadioGroupItem value={tier.id} id={tier.id} />
+                    <div className="flex-1 min-w-0">
+                      <Label
+                        htmlFor={tier.id}
+                        className="font-medium text-foreground cursor-pointer"
+                      >
+                        {tier.label}
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        {tier.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
 
             {/* Action Buttons */}
             <div className="flex flex-col gap-2 pt-2">
