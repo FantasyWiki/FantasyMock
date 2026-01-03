@@ -186,6 +186,7 @@ export default function Team() {
           article={selectedArticle}
           onClose={() => setSelectedArticle(null)}
           onSwap={handleInitiateSwap}
+          allArticles={getArticlesByPosition()}
         />
       </main>
     </div>

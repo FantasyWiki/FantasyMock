@@ -6,31 +6,26 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, TrendingUp, TrendingDown, Clock, ArrowRightLeft, Coins } from "lucide-react";
+import { Calendar, TrendingUp, TrendingDown, Clock, ArrowRightLeft, Coins, Link2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { NeighborChemistry, getChemistryLabel, getChemistryColor, calculateChemistry, getArticleNeighbors } from "@/lib/chemistry";
 
 interface ArticleContractDetailDialogProps {
   article: Article | null;
   onClose: () => void;
   onSwap: (article: Article) => void;
+  allArticles?: {
+    forwards: Article[];
+    midfielders: Article[];
+    defenders: Article[];
+    goalkeeper: Article | undefined;
+  };
 }
 
-const getChemistryLabel = (chemistry: string) => {
-  switch (chemistry) {
-    case "green": return { label: "Excellent", color: "bg-primary text-primary-foreground" };
-    case "yellow": return { label: "Good", color: "bg-[hsl(var(--wiki-gold))] text-foreground" };
-    case "orange": return { label: "Weak", color: "bg-orange-500 text-white" };
-    case "red": return { label: "Poor", color: "bg-destructive text-destructive-foreground" };
-    default: return { label: "None", color: "bg-muted text-muted-foreground" };
-  }
-};
-
-export function ArticleContractDetailDialog({ article, onClose, onSwap }: ArticleContractDetailDialogProps) {
+export function ArticleContractDetailDialog({ article, onClose, onSwap, allArticles }: ArticleContractDetailDialogProps) {
   if (!article) return null;
 
-  const chemistryInfo = getChemistryLabel(article.chemistry);
   const valueChange = article.currentValue - article.purchasePrice;
   const valueChangePercent = ((valueChange / article.purchasePrice) * 100).toFixed(1);
   const isPositive = valueChange >= 0;
@@ -40,16 +35,23 @@ export function ArticleContractDetailDialog({ article, onClose, onSwap }: Articl
     onClose();
   };
 
+  // Get neighbors and their chemistry for formation articles
+  const neighbors: NeighborChemistry[] = [];
+  if (allArticles) {
+    const neighborArticles = getArticleNeighbors(article.id, allArticles);
+    neighborArticles.forEach(neighbor => {
+      neighbors.push({
+        article: neighbor,
+        chemistry: calculateChemistry(article, neighbor)
+      });
+    });
+  }
+
   return (
     <Dialog open={!!article} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md mx-4">
+      <DialogContent className="max-w-md mx-4 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            <span className="text-xl">{article.name}</span>
-            <Badge className={cn("text-xs", chemistryInfo.color)}>
-              {chemistryInfo.label} Chemistry
-            </Badge>
-          </DialogTitle>
+          <DialogTitle className="text-xl">{article.name}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -118,6 +120,48 @@ export function ArticleContractDetailDialog({ article, onClose, onSwap }: Articl
               </span>
             </div>
           </div>
+
+          {/* Chemistry with Neighbors - only show for formation articles */}
+          {neighbors.length > 0 && (
+            <>
+              <Separator />
+              <div className="space-y-3">
+                <h4 className="font-semibold flex items-center gap-2">
+                  <Link2 className="h-4 w-4 text-muted-foreground" />
+                  Chemistry Links
+                </h4>
+                
+                <div className="space-y-2">
+                  {neighbors.map((neighbor) => {
+                    const chemInfo = getChemistryLabel(neighbor.chemistry);
+                    return (
+                      <div 
+                        key={neighbor.article.id}
+                        className="flex items-center justify-between p-3 bg-card rounded-lg border"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div 
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: getChemistryColor(neighbor.chemistry) }}
+                          />
+                          <span className="font-medium text-sm">{neighbor.article.name}</span>
+                        </div>
+                        <div className="text-right">
+                          <span 
+                            className="text-sm font-medium"
+                            style={{ color: getChemistryColor(neighbor.chemistry) }}
+                          >
+                            {chemInfo.label}
+                          </span>
+                          <p className="text-xs text-muted-foreground">{chemInfo.description}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
 
           <Separator />
 
