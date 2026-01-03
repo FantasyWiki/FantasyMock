@@ -33,6 +33,7 @@ export function BenchSection({ articles, onArticleClick, swapMode }: BenchSectio
                 article={article}
                 onClick={() => onArticleClick(article)}
                 swapMode={swapMode}
+                isBenched
               />
             ))}
           </div>
