@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, DragEvent } from "react";
 import { Article, Formation } from "@/pages/Team";
 import { ArticleNode } from "./ArticleNode";
 import { ChemistryLinks } from "./ChemistryLinks";
@@ -13,9 +13,22 @@ interface TeamFormationProps {
   };
   onArticleClick: (article: Article) => void;
   swapMode: boolean;
+  onDragStart?: (article: Article) => void;
+  onDragOver?: (article: Article) => void;
+  onDrop?: (article: Article) => void;
+  dragOverArticle?: Article | null;
 }
 
-export function TeamFormation({ formation, articles, onArticleClick, swapMode }: TeamFormationProps) {
+export function TeamFormation({ 
+  formation, 
+  articles, 
+  onArticleClick, 
+  swapMode,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  dragOverArticle
+}: TeamFormationProps) {
   const { forwards, midfielders, defenders, goalkeeper } = articles;
   const mobileContainerRef = useRef<HTMLDivElement>(null);
   const desktopContainerRef = useRef<HTMLDivElement>(null);
@@ -43,6 +56,10 @@ export function TeamFormation({ formation, articles, onArticleClick, swapMode }:
                 article={article}
                 onClick={() => onArticleClick(article)}
                 swapMode={swapMode}
+                onDragStart={(e) => onDragStart?.(article)}
+                onDragOver={(e) => onDragOver?.(article)}
+                onDrop={(e) => onDrop?.(article)}
+                isDragOver={dragOverArticle?.id === article.id}
               />
             </div>
           ))}
@@ -61,6 +78,10 @@ export function TeamFormation({ formation, articles, onArticleClick, swapMode }:
                 article={article}
                 onClick={() => onArticleClick(article)}
                 swapMode={swapMode}
+                onDragStart={(e) => onDragStart?.(article)}
+                onDragOver={(e) => onDragOver?.(article)}
+                onDrop={(e) => onDrop?.(article)}
+                isDragOver={dragOverArticle?.id === article.id}
               />
             </div>
           ))}
@@ -79,6 +100,10 @@ export function TeamFormation({ formation, articles, onArticleClick, swapMode }:
                 article={article}
                 onClick={() => onArticleClick(article)}
                 swapMode={swapMode}
+                onDragStart={(e) => onDragStart?.(article)}
+                onDragOver={(e) => onDragOver?.(article)}
+                onDrop={(e) => onDrop?.(article)}
+                isDragOver={dragOverArticle?.id === article.id}
               />
             </div>
           ))}
@@ -98,6 +123,10 @@ export function TeamFormation({ formation, articles, onArticleClick, swapMode }:
                 onClick={() => onArticleClick(goalkeeper)}
                 swapMode={swapMode}
                 isGoalkeeper
+                onDragStart={(e) => onDragStart?.(goalkeeper)}
+                onDragOver={(e) => onDragOver?.(goalkeeper)}
+                onDrop={(e) => onDrop?.(goalkeeper)}
+                isDragOver={dragOverArticle?.id === goalkeeper.id}
               />
             </div>
           ) : (
@@ -121,6 +150,10 @@ export function TeamFormation({ formation, articles, onArticleClick, swapMode }:
                 onClick={() => onArticleClick(goalkeeper)}
                 swapMode={swapMode}
                 isGoalkeeper
+                onDragStart={(e) => onDragStart?.(goalkeeper)}
+                onDragOver={(e) => onDragOver?.(goalkeeper)}
+                onDrop={(e) => onDrop?.(goalkeeper)}
+                isDragOver={dragOverArticle?.id === goalkeeper.id}
               />
             </div>
           ) : (
@@ -138,6 +171,10 @@ export function TeamFormation({ formation, articles, onArticleClick, swapMode }:
                 article={article}
                 onClick={() => onArticleClick(article)}
                 swapMode={swapMode}
+                onDragStart={(e) => onDragStart?.(article)}
+                onDragOver={(e) => onDragOver?.(article)}
+                onDrop={(e) => onDrop?.(article)}
+                isDragOver={dragOverArticle?.id === article.id}
               />
             </div>
           ))}
@@ -156,6 +193,10 @@ export function TeamFormation({ formation, articles, onArticleClick, swapMode }:
                 article={article}
                 onClick={() => onArticleClick(article)}
                 swapMode={swapMode}
+                onDragStart={(e) => onDragStart?.(article)}
+                onDragOver={(e) => onDragOver?.(article)}
+                onDrop={(e) => onDrop?.(article)}
+                isDragOver={dragOverArticle?.id === article.id}
               />
             </div>
           ))}
@@ -174,6 +215,10 @@ export function TeamFormation({ formation, articles, onArticleClick, swapMode }:
                 article={article}
                 onClick={() => onArticleClick(article)}
                 swapMode={swapMode}
+                onDragStart={(e) => onDragStart?.(article)}
+                onDragOver={(e) => onDragOver?.(article)}
+                onDrop={(e) => onDrop?.(article)}
+                isDragOver={dragOverArticle?.id === article.id}
               />
             </div>
           ))}

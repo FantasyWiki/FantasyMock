@@ -7,11 +7,25 @@ interface BenchSectionProps {
   articles: Article[];
   onArticleClick: (article: Article) => void;
   swapMode: boolean;
+  onDragStart?: (article: Article) => void;
+  onDragOver?: (article: Article) => void;
+  onDrop?: (article: Article) => void;
+  onDragEnd?: () => void;
+  dragOverArticle?: Article | null;
 }
 
-export function BenchSection({ articles, onArticleClick, swapMode }: BenchSectionProps) {
+export function BenchSection({ 
+  articles, 
+  onArticleClick, 
+  swapMode,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  dragOverArticle
+}: BenchSectionProps) {
   return (
-    <Card>
+    <Card onDragEnd={onDragEnd}>
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
           <Users className="h-5 w-5 text-muted-foreground" />
@@ -33,7 +47,10 @@ export function BenchSection({ articles, onArticleClick, swapMode }: BenchSectio
                 article={article}
                 onClick={() => onArticleClick(article)}
                 swapMode={swapMode}
-                isBenched
+                onDragStart={(e) => onDragStart?.(article)}
+                onDragOver={(e) => onDragOver?.(article)}
+                onDrop={(e) => onDrop?.(article)}
+                isDragOver={dragOverArticle?.id === article.id}
               />
             ))}
           </div>
