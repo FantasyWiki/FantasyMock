@@ -65,10 +65,11 @@ export default function Team() {
   const [benchArticles, setBenchArticles] = useState<Article[]>(mockBenchArticles);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [swapMode, setSwapMode] = useState<{ enabled: boolean; article: Article | null }>({ enabled: false, article: null });
+  const [draggedArticle, setDraggedArticle] = useState<Article | null>(null);
+  const [dragOverArticle, setDragOverArticle] = useState<Article | null>(null);
 
   const handleArticleClick = (article: Article) => {
     if (swapMode.enabled && swapMode.article) {
-      // Perform swap
       handleSwapArticles(swapMode.article, article);
       setSwapMode({ enabled: false, article: null });
     } else {
@@ -77,29 +78,60 @@ export default function Team() {
   };
 
   const handleSwapArticles = (fromArticle: Article, toArticle: Article) => {
+    if (fromArticle.id === toArticle.id) return;
+    
     const fromInTeam = teamArticles.find(a => a.id === fromArticle.id);
     const toInTeam = teamArticles.find(a => a.id === toArticle.id);
 
     if (fromInTeam && toInTeam) {
-      // Both in team - swap positions
       setTeamArticles(prev => prev.map(a => {
         if (a.id === fromArticle.id) return { ...toArticle, position: fromArticle.position };
         if (a.id === toArticle.id) return { ...fromArticle, position: toArticle.position };
         return a;
       }));
     } else if (fromInTeam && !toInTeam) {
-      // From team to bench
       setTeamArticles(prev => prev.map(a => 
         a.id === fromArticle.id ? { ...toArticle, position: fromArticle.position } : a
       ));
       setBenchArticles(prev => [...prev.filter(a => a.id !== toArticle.id), { ...fromArticle, position: "bench" }]);
     } else if (!fromInTeam && toInTeam) {
-      // From bench to team
       setTeamArticles(prev => prev.map(a => 
         a.id === toArticle.id ? { ...fromArticle, position: toArticle.position } : a
       ));
       setBenchArticles(prev => [...prev.filter(a => a.id !== fromArticle.id), { ...toArticle, position: "bench" }]);
+    } else {
+      // Both on bench - just swap positions in bench array
+      setBenchArticles(prev => {
+        const fromIdx = prev.findIndex(a => a.id === fromArticle.id);
+        const toIdx = prev.findIndex(a => a.id === toArticle.id);
+        const newBench = [...prev];
+        [newBench[fromIdx], newBench[toIdx]] = [newBench[toIdx], newBench[fromIdx]];
+        return newBench;
+      });
     }
+  };
+
+  const handleDragStart = (article: Article) => {
+    setDraggedArticle(article);
+  };
+
+  const handleDragOver = (article: Article) => {
+    if (draggedArticle && article.id !== draggedArticle.id) {
+      setDragOverArticle(article);
+    }
+  };
+
+  const handleDrop = (targetArticle: Article) => {
+    if (draggedArticle && draggedArticle.id !== targetArticle.id) {
+      handleSwapArticles(draggedArticle, targetArticle);
+    }
+    setDraggedArticle(null);
+    setDragOverArticle(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedArticle(null);
+    setDragOverArticle(null);
   };
 
   const handleInitiateSwap = (article: Article) => {
@@ -164,12 +196,16 @@ export default function Team() {
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Starting Lineup</CardTitle>
           </CardHeader>
-          <CardContent className="p-2 md:p-6">
+          <CardContent className="p-2 md:p-6" onDragEnd={handleDragEnd}>
             <TeamFormation
               formation={currentFormation}
               articles={getArticlesByPosition()}
               onArticleClick={handleArticleClick}
               swapMode={swapMode.enabled}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              dragOverArticle={dragOverArticle}
             />
           </CardContent>
         </Card>
@@ -179,6 +215,11 @@ export default function Team() {
           articles={benchArticles}
           onArticleClick={handleArticleClick}
           swapMode={swapMode.enabled}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onDragEnd={handleDragEnd}
+          dragOverArticle={dragOverArticle}
         />
 
         {/* Contract Detail Dialog */}
