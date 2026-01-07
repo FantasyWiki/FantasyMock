@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSelector } from "./LanguageSelector";
+import { LeagueSelector } from "./LeagueSelector";
 
 interface HeaderProps {
   onSignInClick?: () => void;
@@ -78,6 +79,7 @@ export function Header({ onSignInClick }: HeaderProps) {
 
             {/* Right Actions */}
             <div className="flex items-center gap-2">
+              <LeagueSelector />
               <LanguageSelector />
               <ThemeToggle />
               <Button 
