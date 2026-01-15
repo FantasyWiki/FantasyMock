@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { TeamFormation } from "@/components/team/TeamFormation";
 import { BenchSection } from "@/components/team/BenchSection";
 import { FormationSelector } from "@/components/team/FormationSelector";
 import { ArticleContractDetailDialog } from "@/components/team/ArticleContractDetailDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Layers } from "lucide-react";
+import { useLeague } from "@/contexts/LeagueContext";
 
 export interface Article {
   id: string;
@@ -17,6 +19,7 @@ export interface Article {
   purchasePrice: number;
   currentValue: number;
   position: string;
+  leagueId?: string;
 }
 
 export interface Formation {
@@ -37,36 +40,139 @@ const formations: Formation[] = [
   { id: "5-3-2", name: "5-3-2", positions: { forwards: 2, midfielders: 3, defenders: 5 } },
 ];
 
-// Mock data
-const mockTeamArticles: Article[] = [
-  { id: "1", name: "Bitcoin", chemistry: "green", points: 45, contractEnd: "2024-03-15", contractLength: "1 Month", purchasePrice: 500, currentValue: 580, position: "forward" },
-  { id: "2", name: "Ethereum", chemistry: "yellow", points: 38, contractEnd: "2024-02-28", contractLength: "2 Weeks", purchasePrice: 400, currentValue: 420, position: "forward" },
-  { id: "3", name: "AI", chemistry: "green", points: 42, contractEnd: "2024-03-20", contractLength: "1 Month", purchasePrice: 450, currentValue: 510, position: "forward" },
-  { id: "4", name: "Cloud Computing", chemistry: "yellow", points: 28, contractEnd: "2024-02-25", contractLength: "1 Week", purchasePrice: 300, currentValue: 290, position: "midfield" },
-  { id: "5", name: "Machine Learning", chemistry: "green", points: 35, contractEnd: "2024-03-10", contractLength: "1 Month", purchasePrice: 380, currentValue: 400, position: "midfield" },
-  { id: "6", name: "Blockchain", chemistry: "green", points: 32, contractEnd: "2024-03-05", contractLength: "2 Weeks", purchasePrice: 350, currentValue: 360, position: "midfield" },
-  { id: "7", name: "Python", chemistry: "orange", points: 22, contractEnd: "2024-02-20", contractLength: "1 Week", purchasePrice: 250, currentValue: 240, position: "defense" },
-  { id: "8", name: "JavaScript", chemistry: "green", points: 25, contractEnd: "2024-03-08", contractLength: "2 Weeks", purchasePrice: 280, currentValue: 300, position: "defense" },
-  { id: "9", name: "React", chemistry: "yellow", points: 24, contractEnd: "2024-02-28", contractLength: "1 Week", purchasePrice: 260, currentValue: 270, position: "defense" },
-  { id: "10", name: "TypeScript", chemistry: "green", points: 21, contractEnd: "2024-03-12", contractLength: "1 Month", purchasePrice: 240, currentValue: 255, position: "defense" },
-  { id: "11", name: "Wikipedia", chemistry: "green", points: 50, contractEnd: "2024-03-25", contractLength: "1 Month", purchasePrice: 600, currentValue: 650, position: "goalkeeper" },
-];
+// Mock data with league assignments
+const allTeamArticles: Record<string, Article[]> = {
+  global: [
+    { id: "1", name: "Bitcoin", chemistry: "green", points: 45, contractEnd: "2024-03-15", contractLength: "1 Month", purchasePrice: 500, currentValue: 580, position: "forward", leagueId: "global" },
+    { id: "2", name: "Ethereum", chemistry: "yellow", points: 38, contractEnd: "2024-02-28", contractLength: "2 Weeks", purchasePrice: 400, currentValue: 420, position: "forward", leagueId: "global" },
+    { id: "3", name: "AI", chemistry: "green", points: 42, contractEnd: "2024-03-20", contractLength: "1 Month", purchasePrice: 450, currentValue: 510, position: "forward", leagueId: "global" },
+    { id: "4", name: "Cloud Computing", chemistry: "yellow", points: 28, contractEnd: "2024-02-25", contractLength: "1 Week", purchasePrice: 300, currentValue: 290, position: "midfield", leagueId: "global" },
+    { id: "5", name: "Machine Learning", chemistry: "green", points: 35, contractEnd: "2024-03-10", contractLength: "1 Month", purchasePrice: 380, currentValue: 400, position: "midfield", leagueId: "global" },
+    { id: "6", name: "Blockchain", chemistry: "green", points: 32, contractEnd: "2024-03-05", contractLength: "2 Weeks", purchasePrice: 350, currentValue: 360, position: "midfield", leagueId: "global" },
+    { id: "7", name: "Python", chemistry: "orange", points: 22, contractEnd: "2024-02-20", contractLength: "1 Week", purchasePrice: 250, currentValue: 240, position: "defense", leagueId: "global" },
+    { id: "8", name: "JavaScript", chemistry: "green", points: 25, contractEnd: "2024-03-08", contractLength: "2 Weeks", purchasePrice: 280, currentValue: 300, position: "defense", leagueId: "global" },
+    { id: "9", name: "React", chemistry: "yellow", points: 24, contractEnd: "2024-02-28", contractLength: "1 Week", purchasePrice: 260, currentValue: 270, position: "defense", leagueId: "global" },
+    { id: "10", name: "TypeScript", chemistry: "green", points: 21, contractEnd: "2024-03-12", contractLength: "1 Month", purchasePrice: 240, currentValue: 255, position: "defense", leagueId: "global" },
+    { id: "11", name: "Wikipedia", chemistry: "green", points: 50, contractEnd: "2024-03-25", contractLength: "1 Month", purchasePrice: 600, currentValue: 650, position: "goalkeeper", leagueId: "global" },
+  ],
+  europe: [
+    { id: "e1", name: "Paris", chemistry: "green", points: 52, contractEnd: "2024-03-15", contractLength: "1 Month", purchasePrice: 520, currentValue: 600, position: "forward", leagueId: "europe" },
+    { id: "e2", name: "Berlin", chemistry: "yellow", points: 40, contractEnd: "2024-02-28", contractLength: "2 Weeks", purchasePrice: 420, currentValue: 450, position: "forward", leagueId: "europe" },
+    { id: "e3", name: "Rome", chemistry: "green", points: 38, contractEnd: "2024-03-20", contractLength: "1 Month", purchasePrice: 400, currentValue: 430, position: "forward", leagueId: "europe" },
+    { id: "e4", name: "Madrid", chemistry: "green", points: 35, contractEnd: "2024-02-25", contractLength: "1 Week", purchasePrice: 350, currentValue: 380, position: "midfield", leagueId: "europe" },
+    { id: "e5", name: "London", chemistry: "yellow", points: 42, contractEnd: "2024-03-10", contractLength: "1 Month", purchasePrice: 450, currentValue: 480, position: "midfield", leagueId: "europe" },
+    { id: "e6", name: "Amsterdam", chemistry: "green", points: 30, contractEnd: "2024-03-05", contractLength: "2 Weeks", purchasePrice: 300, currentValue: 320, position: "midfield", leagueId: "europe" },
+    { id: "e7", name: "Vienna", chemistry: "orange", points: 25, contractEnd: "2024-02-20", contractLength: "1 Week", purchasePrice: 280, currentValue: 270, position: "defense", leagueId: "europe" },
+    { id: "e8", name: "Prague", chemistry: "green", points: 28, contractEnd: "2024-03-08", contractLength: "2 Weeks", purchasePrice: 300, currentValue: 320, position: "defense", leagueId: "europe" },
+    { id: "e9", name: "Dublin", chemistry: "yellow", points: 22, contractEnd: "2024-02-28", contractLength: "1 Week", purchasePrice: 240, currentValue: 250, position: "defense", leagueId: "europe" },
+    { id: "e10", name: "Stockholm", chemistry: "green", points: 26, contractEnd: "2024-03-12", contractLength: "1 Month", purchasePrice: 280, currentValue: 300, position: "defense", leagueId: "europe" },
+    { id: "e11", name: "Euro", chemistry: "green", points: 55, contractEnd: "2024-03-25", contractLength: "1 Month", purchasePrice: 650, currentValue: 700, position: "goalkeeper", leagueId: "europe" },
+  ],
+  americas: [
+    { id: "a1", name: "New York", chemistry: "green", points: 48, contractEnd: "2024-03-15", contractLength: "1 Month", purchasePrice: 480, currentValue: 550, position: "forward", leagueId: "americas" },
+    { id: "a2", name: "Los Angeles", chemistry: "yellow", points: 44, contractEnd: "2024-02-28", contractLength: "2 Weeks", purchasePrice: 440, currentValue: 470, position: "forward", leagueId: "americas" },
+    { id: "a3", name: "São Paulo", chemistry: "green", points: 36, contractEnd: "2024-03-20", contractLength: "1 Month", purchasePrice: 380, currentValue: 400, position: "forward", leagueId: "americas" },
+    { id: "a4", name: "Toronto", chemistry: "yellow", points: 32, contractEnd: "2024-02-25", contractLength: "1 Week", purchasePrice: 320, currentValue: 340, position: "midfield", leagueId: "americas" },
+    { id: "a5", name: "Chicago", chemistry: "green", points: 30, contractEnd: "2024-03-10", contractLength: "1 Month", purchasePrice: 300, currentValue: 320, position: "midfield", leagueId: "americas" },
+    { id: "a6", name: "Mexico City", chemistry: "green", points: 34, contractEnd: "2024-03-05", contractLength: "2 Weeks", purchasePrice: 360, currentValue: 380, position: "midfield", leagueId: "americas" },
+    { id: "a7", name: "Miami", chemistry: "orange", points: 26, contractEnd: "2024-02-20", contractLength: "1 Week", purchasePrice: 270, currentValue: 260, position: "defense", leagueId: "americas" },
+    { id: "a8", name: "Vancouver", chemistry: "green", points: 24, contractEnd: "2024-03-08", contractLength: "2 Weeks", purchasePrice: 260, currentValue: 280, position: "defense", leagueId: "americas" },
+    { id: "a9", name: "Buenos Aires", chemistry: "yellow", points: 28, contractEnd: "2024-02-28", contractLength: "1 Week", purchasePrice: 290, currentValue: 300, position: "defense", leagueId: "americas" },
+    { id: "a10", name: "Lima", chemistry: "green", points: 22, contractEnd: "2024-03-12", contractLength: "1 Month", purchasePrice: 230, currentValue: 240, position: "defense", leagueId: "americas" },
+    { id: "a11", name: "Dollar", chemistry: "green", points: 58, contractEnd: "2024-03-25", contractLength: "1 Month", purchasePrice: 620, currentValue: 680, position: "goalkeeper", leagueId: "americas" },
+  ],
+  asia: [
+    { id: "as1", name: "Tokyo", chemistry: "green", points: 55, contractEnd: "2024-03-15", contractLength: "1 Month", purchasePrice: 560, currentValue: 620, position: "forward", leagueId: "asia" },
+    { id: "as2", name: "Shanghai", chemistry: "yellow", points: 50, contractEnd: "2024-02-28", contractLength: "2 Weeks", purchasePrice: 500, currentValue: 530, position: "forward", leagueId: "asia" },
+    { id: "as3", name: "Seoul", chemistry: "green", points: 46, contractEnd: "2024-03-20", contractLength: "1 Month", purchasePrice: 480, currentValue: 510, position: "forward", leagueId: "asia" },
+    { id: "as4", name: "Singapore", chemistry: "green", points: 38, contractEnd: "2024-02-25", contractLength: "1 Week", purchasePrice: 400, currentValue: 420, position: "midfield", leagueId: "asia" },
+    { id: "as5", name: "Hong Kong", chemistry: "yellow", points: 42, contractEnd: "2024-03-10", contractLength: "1 Month", purchasePrice: 450, currentValue: 470, position: "midfield", leagueId: "asia" },
+    { id: "as6", name: "Mumbai", chemistry: "green", points: 35, contractEnd: "2024-03-05", contractLength: "2 Weeks", purchasePrice: 370, currentValue: 390, position: "midfield", leagueId: "asia" },
+    { id: "as7", name: "Bangkok", chemistry: "orange", points: 28, contractEnd: "2024-02-20", contractLength: "1 Week", purchasePrice: 300, currentValue: 290, position: "defense", leagueId: "asia" },
+    { id: "as8", name: "Taipei", chemistry: "green", points: 30, contractEnd: "2024-03-08", contractLength: "2 Weeks", purchasePrice: 320, currentValue: 340, position: "defense", leagueId: "asia" },
+    { id: "as9", name: "Jakarta", chemistry: "yellow", points: 26, contractEnd: "2024-02-28", contractLength: "1 Week", purchasePrice: 280, currentValue: 290, position: "defense", leagueId: "asia" },
+    { id: "as10", name: "Manila", chemistry: "green", points: 24, contractEnd: "2024-03-12", contractLength: "1 Month", purchasePrice: 260, currentValue: 275, position: "defense", leagueId: "asia" },
+    { id: "as11", name: "Yen", chemistry: "green", points: 60, contractEnd: "2024-03-25", contractLength: "1 Month", purchasePrice: 680, currentValue: 750, position: "goalkeeper", leagueId: "asia" },
+  ],
+  premier: [
+    { id: "p1", name: "Gold", chemistry: "green", points: 65, contractEnd: "2024-03-15", contractLength: "1 Month", purchasePrice: 700, currentValue: 780, position: "forward", leagueId: "premier" },
+    { id: "p2", name: "Silver", chemistry: "yellow", points: 58, contractEnd: "2024-02-28", contractLength: "2 Weeks", purchasePrice: 600, currentValue: 640, position: "forward", leagueId: "premier" },
+    { id: "p3", name: "Platinum", chemistry: "green", points: 52, contractEnd: "2024-03-20", contractLength: "1 Month", purchasePrice: 550, currentValue: 590, position: "forward", leagueId: "premier" },
+    { id: "p4", name: "Diamond", chemistry: "green", points: 48, contractEnd: "2024-02-25", contractLength: "1 Week", purchasePrice: 500, currentValue: 530, position: "midfield", leagueId: "premier" },
+    { id: "p5", name: "Ruby", chemistry: "yellow", points: 45, contractEnd: "2024-03-10", contractLength: "1 Month", purchasePrice: 480, currentValue: 500, position: "midfield", leagueId: "premier" },
+    { id: "p6", name: "Emerald", chemistry: "green", points: 42, contractEnd: "2024-03-05", contractLength: "2 Weeks", purchasePrice: 450, currentValue: 470, position: "midfield", leagueId: "premier" },
+    { id: "p7", name: "Sapphire", chemistry: "orange", points: 38, contractEnd: "2024-02-20", contractLength: "1 Week", purchasePrice: 400, currentValue: 390, position: "defense", leagueId: "premier" },
+    { id: "p8", name: "Amethyst", chemistry: "green", points: 35, contractEnd: "2024-03-08", contractLength: "2 Weeks", purchasePrice: 380, currentValue: 400, position: "defense", leagueId: "premier" },
+    { id: "p9", name: "Topaz", chemistry: "yellow", points: 32, contractEnd: "2024-02-28", contractLength: "1 Week", purchasePrice: 350, currentValue: 360, position: "defense", leagueId: "premier" },
+    { id: "p10", name: "Opal", chemistry: "green", points: 30, contractEnd: "2024-03-12", contractLength: "1 Month", purchasePrice: 320, currentValue: 340, position: "defense", leagueId: "premier" },
+    { id: "p11", name: "Crown", chemistry: "green", points: 70, contractEnd: "2024-03-25", contractLength: "1 Month", purchasePrice: 800, currentValue: 900, position: "goalkeeper", leagueId: "premier" },
+  ],
+  champions: [
+    { id: "c1", name: "Universe", chemistry: "green", points: 75, contractEnd: "2024-03-15", contractLength: "1 Month", purchasePrice: 850, currentValue: 950, position: "forward", leagueId: "champions" },
+    { id: "c2", name: "Galaxy", chemistry: "yellow", points: 68, contractEnd: "2024-02-28", contractLength: "2 Weeks", purchasePrice: 750, currentValue: 800, position: "forward", leagueId: "champions" },
+    { id: "c3", name: "Cosmos", chemistry: "green", points: 62, contractEnd: "2024-03-20", contractLength: "1 Month", purchasePrice: 680, currentValue: 720, position: "forward", leagueId: "champions" },
+    { id: "c4", name: "Nebula", chemistry: "green", points: 55, contractEnd: "2024-02-25", contractLength: "1 Week", purchasePrice: 600, currentValue: 640, position: "midfield", leagueId: "champions" },
+    { id: "c5", name: "Supernova", chemistry: "yellow", points: 52, contractEnd: "2024-03-10", contractLength: "1 Month", purchasePrice: 580, currentValue: 610, position: "midfield", leagueId: "champions" },
+    { id: "c6", name: "Quasar", chemistry: "green", points: 48, contractEnd: "2024-03-05", contractLength: "2 Weeks", purchasePrice: 520, currentValue: 550, position: "midfield", leagueId: "champions" },
+    { id: "c7", name: "Pulsar", chemistry: "orange", points: 42, contractEnd: "2024-02-20", contractLength: "1 Week", purchasePrice: 460, currentValue: 450, position: "defense", leagueId: "champions" },
+    { id: "c8", name: "Comet", chemistry: "green", points: 40, contractEnd: "2024-03-08", contractLength: "2 Weeks", purchasePrice: 440, currentValue: 460, position: "defense", leagueId: "champions" },
+    { id: "c9", name: "Meteor", chemistry: "yellow", points: 38, contractEnd: "2024-02-28", contractLength: "1 Week", purchasePrice: 420, currentValue: 430, position: "defense", leagueId: "champions" },
+    { id: "c10", name: "Asteroid", chemistry: "green", points: 35, contractEnd: "2024-03-12", contractLength: "1 Month", purchasePrice: 380, currentValue: 400, position: "defense", leagueId: "champions" },
+    { id: "c11", name: "Star", chemistry: "green", points: 80, contractEnd: "2024-03-25", contractLength: "1 Month", purchasePrice: 950, currentValue: 1100, position: "goalkeeper", leagueId: "champions" },
+  ],
+};
 
-const mockBenchArticles: Article[] = [
-  { id: "12", name: "Vue.js", chemistry: "none", points: 18, contractEnd: "2024-02-18", contractLength: "1 Week", purchasePrice: 200, currentValue: 210, position: "midfield" },
-  { id: "13", name: "Angular", chemistry: "none", points: 15, contractEnd: "2024-02-22", contractLength: "1 Week", purchasePrice: 180, currentValue: 175, position: "defense" },
-  { id: "14", name: "Solana", chemistry: "none", points: 30, contractEnd: "2024-03-01", contractLength: "2 Weeks", purchasePrice: 320, currentValue: 350, position: "forward" },
-  { id: "15", name: "Cardano", chemistry: "none", points: 20, contractEnd: "2024-02-26", contractLength: "1 Week", purchasePrice: 220, currentValue: 215, position: "midfield" },
-];
+const allBenchArticles: Record<string, Article[]> = {
+  global: [
+    { id: "12", name: "Vue.js", chemistry: "none", points: 18, contractEnd: "2024-02-18", contractLength: "1 Week", purchasePrice: 200, currentValue: 210, position: "midfield", leagueId: "global" },
+    { id: "13", name: "Angular", chemistry: "none", points: 15, contractEnd: "2024-02-22", contractLength: "1 Week", purchasePrice: 180, currentValue: 175, position: "defense", leagueId: "global" },
+    { id: "14", name: "Solana", chemistry: "none", points: 30, contractEnd: "2024-03-01", contractLength: "2 Weeks", purchasePrice: 320, currentValue: 350, position: "forward", leagueId: "global" },
+  ],
+  europe: [
+    { id: "eb1", name: "Brussels", chemistry: "none", points: 20, contractEnd: "2024-02-18", contractLength: "1 Week", purchasePrice: 220, currentValue: 230, position: "midfield", leagueId: "europe" },
+    { id: "eb2", name: "Warsaw", chemistry: "none", points: 18, contractEnd: "2024-02-22", contractLength: "1 Week", purchasePrice: 200, currentValue: 210, position: "defense", leagueId: "europe" },
+  ],
+  americas: [
+    { id: "ab1", name: "Seattle", chemistry: "none", points: 22, contractEnd: "2024-02-18", contractLength: "1 Week", purchasePrice: 240, currentValue: 250, position: "midfield", leagueId: "americas" },
+    { id: "ab2", name: "Denver", chemistry: "none", points: 19, contractEnd: "2024-02-22", contractLength: "1 Week", purchasePrice: 210, currentValue: 220, position: "defense", leagueId: "americas" },
+  ],
+  asia: [
+    { id: "asb1", name: "Osaka", chemistry: "none", points: 28, contractEnd: "2024-02-18", contractLength: "1 Week", purchasePrice: 300, currentValue: 310, position: "midfield", leagueId: "asia" },
+    { id: "asb2", name: "Delhi", chemistry: "none", points: 24, contractEnd: "2024-02-22", contractLength: "1 Week", purchasePrice: 260, currentValue: 270, position: "defense", leagueId: "asia" },
+  ],
+  premier: [
+    { id: "pb1", name: "Pearl", chemistry: "none", points: 28, contractEnd: "2024-02-18", contractLength: "1 Week", purchasePrice: 300, currentValue: 310, position: "midfield", leagueId: "premier" },
+  ],
+  champions: [
+    { id: "cb1", name: "Orbit", chemistry: "none", points: 35, contractEnd: "2024-02-18", contractLength: "1 Week", purchasePrice: 380, currentValue: 400, position: "forward", leagueId: "champions" },
+  ],
+};
 
 export default function Team() {
+  const { currentLeague } = useLeague();
   const [currentFormation, setCurrentFormation] = useState<Formation>(formations[0]);
-  const [teamArticles, setTeamArticles] = useState<Article[]>(mockTeamArticles);
-  const [benchArticles, setBenchArticles] = useState<Article[]>(mockBenchArticles);
+  
+  // Get articles for current league
+  const leagueTeamArticles = useMemo(() => {
+    return allTeamArticles[currentLeague.id] || allTeamArticles.global;
+  }, [currentLeague.id]);
+  
+  const leagueBenchArticles = useMemo(() => {
+    return allBenchArticles[currentLeague.id] || allBenchArticles.global;
+  }, [currentLeague.id]);
+  
+  const [teamArticles, setTeamArticles] = useState<Article[]>(leagueTeamArticles);
+  const [benchArticles, setBenchArticles] = useState<Article[]>(leagueBenchArticles);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [swapMode, setSwapMode] = useState<{ enabled: boolean; article: Article | null }>({ enabled: false, article: null });
   const [draggedArticle, setDraggedArticle] = useState<Article | null>(null);
   const [dragOverArticle, setDragOverArticle] = useState<Article | null>(null);
+
+  // Update articles when league changes
+  useMemo(() => {
+    setTeamArticles(leagueTeamArticles);
+    setBenchArticles(leagueBenchArticles);
+  }, [leagueTeamArticles, leagueBenchArticles]);
 
   const handleArticleClick = (article: Article) => {
     if (swapMode.enabled && swapMode.article) {
@@ -162,7 +268,14 @@ export default function Team() {
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Layers className="h-5 w-5 text-primary" />
             </div>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold">Team Management</h1>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-serif font-bold">Team Management</h1>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge variant="secondary" className="text-xs">
+                  {currentLeague.icon} {currentLeague.name}
+                </Badge>
+              </div>
+            </div>
           </div>
           <p className="text-muted-foreground">Manage your formation and article lineup</p>
         </div>

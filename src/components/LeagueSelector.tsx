@@ -6,19 +6,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-
-const leagues = [
-  { id: "global", name: "Global League", icon: "🌍" },
-  { id: "europe", name: "European League", icon: "🇪🇺" },
-  { id: "americas", name: "Americas League", icon: "🌎" },
-  { id: "asia", name: "Asia-Pacific League", icon: "🌏" },
-  { id: "premier", name: "Premier League", icon: "⭐" },
-  { id: "champions", name: "Champions League", icon: "🏆" },
-];
+import { useLeague, leagues } from "@/contexts/LeagueContext";
 
 export function LeagueSelector() {
-  const [currentLeague, setCurrentLeague] = useState(leagues[0]);
+  const { currentLeague, setCurrentLeague } = useLeague();
 
   return (
     <DropdownMenu>
