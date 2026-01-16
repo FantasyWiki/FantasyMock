@@ -13,76 +13,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bell, ArrowLeftRight, Coins, Check, X, Clock, User } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-
-interface TradeProposal {
-  id: number;
-  type: "incoming" | "outgoing";
-  status: "pending" | "accepted" | "rejected";
-  fromUser: string;
-  fromTeam: string;
-  toUser: string;
-  toTeam: string;
-  offeredArticle?: { title: string; basePrice: number };
-  offeredCredits?: number;
-  requestedArticle: { title: string; basePrice: number };
-  contractTier: string;
-  createdAt: Date;
-}
-
-const mockTradeProposals: TradeProposal[] = [
-  {
-    id: 1,
-    type: "incoming",
-    status: "pending",
-    fromUser: "Alex Chen",
-    fromTeam: "Wiki Warriors",
-    toUser: "You",
-    toTeam: "Knowledge Kings",
-    offeredArticle: { title: "Albert Einstein", basePrice: 850 },
-    requestedArticle: { title: "Python (programming language)", basePrice: 950 },
-    contractTier: "2 Weeks",
-    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-  },
-  {
-    id: 2,
-    type: "incoming",
-    status: "pending",
-    fromUser: "Sarah Kim",
-    fromTeam: "Data Dynamos",
-    toUser: "You",
-    toTeam: "Knowledge Kings",
-    offeredCredits: 1200,
-    requestedArticle: { title: "JavaScript", basePrice: 1100 },
-    contractTier: "1 Month",
-    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
-  },
-  {
-    id: 3,
-    type: "outgoing",
-    status: "pending",
-    fromUser: "You",
-    fromTeam: "Knowledge Kings",
-    toUser: "Mike Johnson",
-    toTeam: "Article Aces",
-    offeredCredits: 800,
-    requestedArticle: { title: "React (software)", basePrice: 900 },
-    contractTier: "1 Week",
-    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 4,
-    type: "incoming",
-    status: "accepted",
-    fromUser: "Jamie Lee",
-    fromTeam: "Page Pioneers",
-    toUser: "You",
-    toTeam: "Knowledge Kings",
-    offeredArticle: { title: "Machine Learning", basePrice: 1050 },
-    requestedArticle: { title: "Artificial Intelligence", basePrice: 1200 },
-    contractTier: "2 Weeks",
-    createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
-  },
-];
+import { useLeague, leagues } from "@/contexts/LeagueContext";
+import { useTradeProposals } from "@/contexts/TradeProposalsContext";
 
 const formatTimeAgo = (date: Date): string => {
   const diff = Date.now() - date.getTime();
@@ -94,11 +26,12 @@ const formatTimeAgo = (date: Date): string => {
 };
 
 export const TradeInbox = () => {
-  const [proposals, setProposals] = useState<TradeProposal[]>(mockTradeProposals);
+  const { currentLeague } = useLeague();
+  const { proposals, setProposals, getProposalsByLeague, getPendingCountByLeague } = useTradeProposals();
   const [activeTab, setActiveTab] = useState("incoming");
 
-  const pendingIncoming = proposals.filter(p => p.type === "incoming" && p.status === "pending");
-  const pendingCount = pendingIncoming.length;
+  const leagueProposals = getProposalsByLeague(currentLeague.id);
+  const pendingCount = getPendingCountByLeague(currentLeague.id);
 
   const handleAccept = (proposalId: number) => {
     setProposals(prev => 
@@ -128,10 +61,10 @@ export const TradeInbox = () => {
     });
   };
 
-  const incomingProposals = proposals.filter(p => p.type === "incoming");
-  const outgoingProposals = proposals.filter(p => p.type === "outgoing");
+  const incomingProposals = leagueProposals.filter(p => p.type === "incoming");
+  const outgoingProposals = leagueProposals.filter(p => p.type === "outgoing");
 
-  const renderProposalCard = (proposal: TradeProposal, isIncoming: boolean) => (
+  const renderProposalCard = (proposal: typeof leagueProposals[0], isIncoming: boolean) => (
     <Card key={proposal.id} className="border-border bg-card">
       <CardContent className="p-4 space-y-3">
         {/* Header */}
@@ -249,6 +182,8 @@ export const TradeInbox = () => {
     </Card>
   );
 
+  const currentLeagueInfo = leagues.find(l => l.id === currentLeague.id);
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -266,9 +201,12 @@ export const TradeInbox = () => {
           <SheetTitle className="flex items-center gap-2">
             <ArrowLeftRight className="h-5 w-5 text-primary" />
             Trade Proposals
+            <Badge variant="outline" className="ml-2">
+              {currentLeagueInfo?.icon} {currentLeague.name}
+            </Badge>
           </SheetTitle>
           <SheetDescription>
-            Manage your incoming and outgoing trade requests
+            Manage trade requests for {currentLeague.name}
           </SheetDescription>
         </SheetHeader>
 
@@ -289,7 +227,7 @@ export const TradeInbox = () => {
             {incomingProposals.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Bell className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>No incoming trade proposals</p>
+                <p>No incoming trade proposals in {currentLeague.name}</p>
               </div>
             ) : (
               incomingProposals.map(p => renderProposalCard(p, true))
@@ -300,7 +238,7 @@ export const TradeInbox = () => {
             {outgoingProposals.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <ArrowLeftRight className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>No outgoing trade proposals</p>
+                <p>No outgoing trade proposals in {currentLeague.name}</p>
               </div>
             ) : (
               outgoingProposals.map(p => renderProposalCard(p, false))
