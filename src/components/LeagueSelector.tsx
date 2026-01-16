@@ -24,7 +24,8 @@ export function LeagueSelector() {
           size="sm"
           className="h-9 gap-2 rounded-full bg-secondary/50 px-3 hover:bg-secondary relative"
         >
-          <Trophy className="h-4 w-4" />
+          <span className="sm:hidden text-base">{currentLeague.icon}</span>
+          <Trophy className="h-4 w-4 hidden sm:block" />
           <span className="hidden sm:inline">{currentLeague.icon}</span>
           <span className="hidden md:inline text-sm truncate max-w-[80px]">{currentLeague.name.split(' ')[0]}</span>
           {totalPendingCount > 0 && (
