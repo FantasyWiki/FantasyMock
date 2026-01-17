@@ -130,10 +130,10 @@ export function HeroSection() {
 
             {/* Floating Elements */}
             <div className="absolute -top-4 -right-4 bg-wiki-gold text-foreground px-3 py-1.5 rounded-full text-sm font-medium shadow-md animate-float">
-              🏆 Rank #4,523
+              ⚡ Live data
             </div>
             <div className="absolute -bottom-4 -left-4 bg-primary text-primary-foreground px-3 py-1.5 rounded-full text-sm font-medium shadow-md animate-float delay-200">
-              📈 +48.9 pts today
+              📊 451K views today
             </div>
           </div>
         </div>
