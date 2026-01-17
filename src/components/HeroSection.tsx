@@ -133,7 +133,7 @@ export function HeroSection() {
               ⚡ Live data
             </div>
             <div className="absolute -bottom-4 -left-4 bg-primary text-primary-foreground px-3 py-1.5 rounded-full text-sm font-medium shadow-md animate-float delay-200">
-              📊 451K views today
+              📊 Over 2 million views today
             </div>
           </div>
         </div>
