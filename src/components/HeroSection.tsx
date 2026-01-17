@@ -58,12 +58,12 @@ export function HeroSection() {
             {/* Stats */}
             <div className="flex flex-wrap justify-center lg:justify-start gap-6 pt-4 animate-slide-up delay-300">
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-primary">50K+</div>
-                <div className="text-sm text-muted-foreground">Active Players</div>
+                <div className="text-2xl md:text-3xl font-bold text-primary">100+</div>
+                <div className="text-sm text-muted-foreground">Languages Covered</div>
               </div>
               <div className="h-12 w-px bg-border hidden sm:block" />
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-primary">1M+</div>
+                <div className="text-2xl md:text-3xl font-bold text-primary">8M+</div>
                 <div className="text-sm text-muted-foreground">Articles Available</div>
               </div>
               <div className="h-12 w-px bg-border hidden sm:block" />
