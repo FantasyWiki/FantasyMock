@@ -63,12 +63,6 @@ export function HowItWorks() {
                 </p>
               </div>
 
-              {/* Arrow (hide on last item and mobile) */}
-              {index < steps.length - 1 && (
-                <div className="hidden lg:flex absolute top-1/2 -right-3 -translate-y-1/2 z-10">
-                  <ArrowRight className="h-6 w-6 text-muted-foreground/50" />
-                </div>
-              )}
             </div>
           ))}
         </div>
