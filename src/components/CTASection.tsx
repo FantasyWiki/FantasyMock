@@ -29,7 +29,7 @@ export function CTASection() {
               Wikipedia-based fantasy game. Start with 1,000 free credits.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex justify-center">
               <Button 
                 size="lg" 
                 variant="secondary"
@@ -37,13 +37,6 @@ export function CTASection() {
               >
                 Create Free Account
                 <ArrowRight className="h-5 w-5" />
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="gap-2 text-lg px-8 py-6 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
-              >
-                Watch Demo
               </Button>
             </div>
 
