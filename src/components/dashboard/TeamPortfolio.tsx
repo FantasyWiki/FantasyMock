@@ -1,12 +1,13 @@
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Layers, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArticleNode } from "@/components/team/ArticleNode";
 import { ChemistryLinks } from "@/components/team/ChemistryLinks";
 import { useLeague } from "@/contexts/LeagueContext";
+import { ArticleContractDetailDialog } from "@/components/team/ArticleContractDetailDialog";
 
 interface DashboardArticle {
   id: string;
@@ -145,14 +146,25 @@ const formationDataByLeague: Record<string, {
 
 export const TeamPortfolio = () => {
   const { currentLeague } = useLeague();
+  const navigate = useNavigate();
   const mobileContainerRef = useRef<HTMLDivElement>(null);
   const desktopContainerRef = useRef<HTMLDivElement>(null);
+  const [selectedArticle, setSelectedArticle] = useState<DashboardArticle | null>(null);
 
   const articles = useMemo(() => {
     return formationDataByLeague[currentLeague.id] || formationDataByLeague.global;
   }, [currentLeague.id]);
 
   const { forwards, midfielders, defenders, goalkeeper } = articles;
+
+  const handleArticleClick = (article: DashboardArticle) => {
+    setSelectedArticle(article);
+  };
+
+  const handleSwap = () => {
+    // Navigate to team page for swapping
+    navigate("/team");
+  };
 
   return (
     <Card className="bg-card border-border">
@@ -194,7 +206,7 @@ export const TeamPortfolio = () => {
             <div className="flex justify-center gap-3 flex-wrap relative z-10">
               {forwards.map((article) => (
                 <div key={article.id} data-article-id={article.id}>
-                  <ArticleNode article={article} onClick={() => {}} />
+                  <ArticleNode article={article} onClick={() => handleArticleClick(article)} />
                 </div>
               ))}
             </div>
@@ -203,7 +215,7 @@ export const TeamPortfolio = () => {
             <div className="flex justify-center gap-3 flex-wrap flex-1 items-center relative z-10">
               {midfielders.map((article) => (
                 <div key={article.id} data-article-id={article.id}>
-                  <ArticleNode article={article} onClick={() => {}} />
+                  <ArticleNode article={article} onClick={() => handleArticleClick(article)} />
                 </div>
               ))}
             </div>
@@ -212,7 +224,7 @@ export const TeamPortfolio = () => {
             <div className="flex justify-center gap-3 flex-wrap relative z-10">
               {defenders.map((article) => (
                 <div key={article.id} data-article-id={article.id}>
-                  <ArticleNode article={article} onClick={() => {}} />
+                  <ArticleNode article={article} onClick={() => handleArticleClick(article)} />
                 </div>
               ))}
             </div>
@@ -221,7 +233,7 @@ export const TeamPortfolio = () => {
             <div className="flex justify-center relative z-10">
               {goalkeeper && (
                 <div data-article-id={goalkeeper.id}>
-                  <ArticleNode article={goalkeeper} onClick={() => {}} isGoalkeeper />
+                  <ArticleNode article={goalkeeper} onClick={() => handleArticleClick(goalkeeper)} isGoalkeeper />
                 </div>
               )}
             </div>
@@ -235,7 +247,7 @@ export const TeamPortfolio = () => {
             <div className="flex items-center justify-center relative z-10">
               {goalkeeper && (
                 <div data-article-id={goalkeeper.id}>
-                  <ArticleNode article={goalkeeper} onClick={() => {}} isGoalkeeper />
+                  <ArticleNode article={goalkeeper} onClick={() => handleArticleClick(goalkeeper)} isGoalkeeper />
                 </div>
               )}
             </div>
@@ -244,7 +256,7 @@ export const TeamPortfolio = () => {
             <div className="flex flex-col justify-around items-center relative z-10">
               {defenders.map((article) => (
                 <div key={article.id} data-article-id={article.id}>
-                  <ArticleNode article={article} onClick={() => {}} />
+                  <ArticleNode article={article} onClick={() => handleArticleClick(article)} />
                 </div>
               ))}
             </div>
@@ -253,7 +265,7 @@ export const TeamPortfolio = () => {
             <div className="flex flex-col justify-around items-center relative z-10">
               {midfielders.map((article) => (
                 <div key={article.id} data-article-id={article.id}>
-                  <ArticleNode article={article} onClick={() => {}} />
+                  <ArticleNode article={article} onClick={() => handleArticleClick(article)} />
                 </div>
               ))}
             </div>
@@ -262,7 +274,7 @@ export const TeamPortfolio = () => {
             <div className="flex flex-col justify-around items-center relative z-10">
               {forwards.map((article) => (
                 <div key={article.id} data-article-id={article.id}>
-                  <ArticleNode article={article} onClick={() => {}} />
+                  <ArticleNode article={article} onClick={() => handleArticleClick(article)} />
                 </div>
               ))}
             </div>
@@ -285,6 +297,14 @@ export const TeamPortfolio = () => {
           </div>
         </div>
       </CardContent>
+
+      {/* Contract Detail Dialog */}
+      <ArticleContractDetailDialog
+        article={selectedArticle}
+        onClose={() => setSelectedArticle(null)}
+        onSwap={handleSwap}
+        allArticles={articles}
+      />
     </Card>
   );
 };
