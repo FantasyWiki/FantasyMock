@@ -144,6 +144,7 @@ const Market = () => {
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead>Article</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Yesterday</TableHead>
                 <TableHead className="text-right">Week</TableHead>
                 <TableHead className="text-right">Month</TableHead>
@@ -173,7 +174,17 @@ const Market = () => {
                       </a>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right text-muted-foreground">{formatViews(article.yesterdayViews)}</TableCell>
+                  <TableCell>
+                    {article.owner ? (
+                      <span className="text-xs font-medium text-accent-foreground bg-accent px-2 py-1 rounded-full">
+                        {article.owner.name}
+                      </span>
+                    ) : (
+                      <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
+                        Free Agent
+                      </span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-right text-muted-foreground">{formatViews(article.weekViews)}</TableCell>
                   <TableCell className="text-right text-muted-foreground">{formatViews(article.monthViews)}</TableCell>
                   <TableCell className="text-right text-muted-foreground">{formatViews(article.yearViews)}</TableCell>
@@ -182,7 +193,7 @@ const Market = () => {
               ))}
               {filteredArticles.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
                     No articles found matching "{searchQuery}"
                   </TableCell>
                 </TableRow>
