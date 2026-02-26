@@ -1,143 +1,28 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Search, TrendingUp, TrendingDown, ArrowLeft, User, Calendar, ShoppingCart } from "lucide-react";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import { Search, ArrowLeft, ExternalLink } from "lucide-react";
 import { ContractPurchaseDialog } from "@/components/market/ContractPurchaseDialog";
 import { ArticleContractDialog } from "@/components/market/ArticleContractDialog";
 
-// Mock data - replace with real API data
 const mockArticles = [
-  {
-    id: 1,
-    title: "Bitcoin",
-    views30d: 125000,
-    viewsLast7d: 35000,
-    viewsPrev7d: 28000,
-    basePrice: 150,
-    trend: "up" as const,
-    owner: null,
-    expiresAt: null,
-  },
-  {
-    id: 2,
-    title: "Ethereum",
-    views30d: 95000,
-    viewsLast7d: 22000,
-    viewsPrev7d: 25000,
-    basePrice: 120,
-    trend: "down" as const,
-    owner: null,
-    expiresAt: null,
-  },
-  {
-    id: 3,
-    title: "Artificial Intelligence",
-    views30d: 250000,
-    viewsLast7d: 75000,
-    viewsPrev7d: 60000,
-    basePrice: 200,
-    trend: "up" as const,
-    owner: { name: "CryptoKing42", teamName: "Tech Titans" },
-    expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 4,
-    title: "Machine Learning",
-    views30d: 80000,
-    viewsLast7d: 18000,
-    viewsPrev7d: 20000,
-    basePrice: 85,
-    trend: "down" as const,
-    owner: null,
-    expiresAt: null,
-  },
-  {
-    id: 5,
-    title: "Blockchain",
-    views30d: 110000,
-    viewsLast7d: 30000,
-    viewsPrev7d: 28000,
-    basePrice: 105,
-    trend: "up" as const,
-    owner: { name: "WikiMaster", teamName: "Knowledge Base" },
-    expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 6,
-    title: "Cryptocurrency",
-    views30d: 180000,
-    viewsLast7d: 45000,
-    viewsPrev7d: 42000,
-    basePrice: 160,
-    trend: "up" as const,
-    owner: null,
-    expiresAt: null,
-  },
-  {
-    id: 7,
-    title: "Satoshi Nakamoto",
-    views30d: 45000,
-    viewsLast7d: 12000,
-    viewsPrev7d: 10000,
-    basePrice: 75,
-    trend: "up" as const,
-    owner: null,
-    expiresAt: null,
-  },
-  {
-    id: 8,
-    title: "Cloud Computing",
-    views30d: 130000,
-    viewsLast7d: 32000,
-    viewsPrev7d: 35000,
-    basePrice: 115,
-    trend: "down" as const,
-    owner: null,
-    expiresAt: null,
-  },
-  {
-    id: 9,
-    title: "NFT",
-    views30d: 65000,
-    viewsLast7d: 15000,
-    viewsPrev7d: 18000,
-    basePrice: 70,
-    trend: "down" as const,
-    owner: { name: "ArtCollector", teamName: "Digital Dreams" },
-    expiresAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 10,
-    title: "Smart Contract",
-    views30d: 55000,
-    viewsLast7d: 14000,
-    viewsPrev7d: 12000,
-    basePrice: 65,
-    trend: "up" as const,
-    owner: null,
-    expiresAt: null,
-  },
+  { id: 1, title: "Bitcoin", slug: "Bitcoin", yesterdayViews: 4800, weekViews: 35000, monthViews: 125000, yearViews: 1500000, owner: null, expiresAt: null },
+  { id: 2, title: "Ethereum", slug: "Ethereum", yesterdayViews: 3200, weekViews: 22000, monthViews: 95000, yearViews: 1100000, owner: null, expiresAt: null },
+  { id: 3, title: "Artificial Intelligence", slug: "Artificial_intelligence", yesterdayViews: 11000, weekViews: 75000, monthViews: 250000, yearViews: 3200000, owner: { name: "CryptoKing42", teamName: "Tech Titans" }, expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) },
+  { id: 4, title: "Machine Learning", slug: "Machine_learning", yesterdayViews: 2600, weekViews: 18000, monthViews: 80000, yearViews: 960000, owner: null, expiresAt: null },
+  { id: 5, title: "Blockchain", slug: "Blockchain", yesterdayViews: 4200, weekViews: 30000, monthViews: 110000, yearViews: 1300000, owner: { name: "WikiMaster", teamName: "Knowledge Base" }, expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000) },
+  { id: 6, title: "Cryptocurrency", slug: "Cryptocurrency", yesterdayViews: 6500, weekViews: 45000, monthViews: 180000, yearViews: 2100000, owner: null, expiresAt: null },
+  { id: 7, title: "Satoshi Nakamoto", slug: "Satoshi_Nakamoto", yesterdayViews: 1700, weekViews: 12000, monthViews: 45000, yearViews: 540000, owner: null, expiresAt: null },
+  { id: 8, title: "Cloud Computing", slug: "Cloud_computing", yesterdayViews: 4600, weekViews: 32000, monthViews: 130000, yearViews: 1560000, owner: null, expiresAt: null },
+  { id: 9, title: "NFT", slug: "Non-fungible_token", yesterdayViews: 2100, weekViews: 15000, monthViews: 65000, yearViews: 780000, owner: { name: "ArtCollector", teamName: "Digital Dreams" }, expiresAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) },
+  { id: 10, title: "Smart Contract", slug: "Smart_contract", yesterdayViews: 2000, weekViews: 14000, monthViews: 55000, yearViews: 660000, owner: null, expiresAt: null },
 ];
-
-// Mock user balance
-const userBalance = 550;
-
-const calculateTrendMultiplier = (viewsLast7d: number, viewsPrev7d: number): number => {
-  const ratio = viewsLast7d / viewsPrev7d;
-  if (ratio > 1.2) return 1.15;
-  if (ratio < 0.8) return 0.85;
-  return 1.0;
-};
-
-const calculateRarityMultiplier = (views30d: number): number => {
-  if (views30d < 1000) return 0.7;
-  return 1.0;
-};
 
 const formatViews = (views: number): string => {
   if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`;
@@ -145,24 +30,22 @@ const formatViews = (views: number): string => {
   return views.toString();
 };
 
-const getDaysUntilExpiry = (expiresAt: Date | null): number | null => {
-  if (!expiresAt) return null;
-  const diff = expiresAt.getTime() - Date.now();
-  return Math.ceil(diff / (24 * 60 * 60 * 1000));
-};
+const userBalance = 550;
 
 const Market = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<typeof mockArticles[0] | null>(null);
   const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
   const [showContractDialog, setShowContractDialog] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
-  const filteredArticles = useMemo(() => {
-    if (!searchQuery.trim()) return mockArticles;
-    return mockArticles.filter((article) =>
-      article.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+  const searchSuggestions = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    return mockArticles
+      .filter((a) => a.title.toLowerCase().includes(searchQuery.toLowerCase()))
+      .slice(0, 5);
   }, [searchQuery]);
 
   const handleArticleClick = (article: typeof mockArticles[0]) => {
@@ -174,10 +57,22 @@ const Market = () => {
     }
   };
 
+  const handleSuggestionClick = (article: typeof mockArticles[0]) => {
+    setSearchQuery(article.title);
+    setIsSearchFocused(false);
+  };
+
   const handlePurchaseComplete = () => {
     setShowPurchaseDialog(false);
     setSelectedArticle(null);
   };
+
+  const filteredArticles = useMemo(() => {
+    if (!searchQuery.trim()) return mockArticles;
+    return mockArticles.filter((a) =>
+      a.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -195,7 +90,7 @@ const Market = () => {
             <ArrowLeft className="h-4 w-4 mr-1" />
             Dashboard
           </Button>
-          
+
           <div className="flex items-center justify-between gap-3">
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl md:text-4xl font-bold text-foreground truncate">
@@ -212,8 +107,8 @@ const Market = () => {
           </div>
         </div>
 
-        {/* Search Section */}
-        <div className="mb-6">
+        {/* Search with Dropdown */}
+        <div className="mb-6 relative" ref={searchRef}>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -221,119 +116,113 @@ const Market = () => {
               placeholder="Search articles..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
               className="pl-10 bg-card border-border h-12"
             />
           </div>
-          
-          {searchQuery && (
-            <p className="text-sm text-muted-foreground mt-2">
-              {filteredArticles.length} result{filteredArticles.length !== 1 ? "s" : ""} for "{searchQuery}"
-            </p>
+
+          {isSearchFocused && searchQuery.trim() && searchSuggestions.length > 0 && (
+            <div className="absolute z-50 top-full mt-1 w-full rounded-md border border-border bg-popover shadow-lg">
+              {searchSuggestions.map((article) => (
+                <button
+                  key={article.id}
+                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-accent transition-colors flex items-center justify-between"
+                  onMouseDown={() => handleSuggestionClick(article)}
+                >
+                  <span className="font-medium text-foreground">{article.title}</span>
+                  <span className="text-xs text-muted-foreground">{formatViews(article.weekViews)} Cr</span>
+                </button>
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Results - Mobile Card View */}
-        <div className="space-y-3">
-          {filteredArticles.map((article) => {
-            const trendMultiplier = calculateTrendMultiplier(article.viewsLast7d, article.viewsPrev7d);
-            const rarityMultiplier = calculateRarityMultiplier(article.views30d);
-            const adjustedPrice = Math.round(article.basePrice * trendMultiplier * rarityMultiplier);
-            const daysUntilExpiry = getDaysUntilExpiry(article.expiresAt);
-            const isFreeAgent = !article.owner;
-
-            return (
-              <Card
-                key={article.id}
-                className={`bg-card border-border cursor-pointer transition-all active:scale-[0.98] hover:shadow-md ${
-                  isFreeAgent ? "hover:border-primary/50" : "hover:border-border"
-                }`}
-                onClick={() => handleArticleClick(article)}
-              >
-                <CardContent className="p-4">
-                  {/* Top Row: Title + Status Badge */}
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <h3 className="font-semibold text-foreground text-lg leading-tight">
-                      {article.title}
-                    </h3>
-                    {isFreeAgent ? (
-                      <Badge className="bg-primary/10 text-primary hover:bg-primary/10 shrink-0">
-                        Free Agent
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary" className="shrink-0">
-                        Owned
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Bottom Row: Stats */}
-                  <div className="flex items-center justify-between gap-2 text-sm">
-                    <div className="flex items-center gap-3">
-                      {/* Views */}
-                      <span className="text-muted-foreground">
-                        {formatViews(article.views30d)} views
-                      </span>
-                      
-                      {/* Trend */}
-                      <div className={`flex items-center gap-0.5 ${
-                        article.trend === "up" ? "text-primary" : "text-destructive"
-                      }`}>
-                        {article.trend === "up" ? (
-                          <TrendingUp className="h-3.5 w-3.5" />
-                        ) : (
-                          <TrendingDown className="h-3.5 w-3.5" />
-                        )}
-                      </div>
+        {/* Articles Table */}
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead>Article</TableHead>
+                <TableHead className="text-right">Yesterday</TableHead>
+                <TableHead className="text-right">Week</TableHead>
+                <TableHead className="text-right">Month</TableHead>
+                <TableHead className="text-right">Year</TableHead>
+                <TableHead className="text-right">Price</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredArticles.map((article) => (
+                <TableRow
+                  key={article.id}
+                  className="cursor-pointer"
+                  onClick={() => handleArticleClick(article)}
+                >
+                  <TableCell>
+                    <div>
+                      <span className="font-medium text-foreground">{article.title}</span>
+                      <a
+                        href={`https://en.wikipedia.org/wiki/${article.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors mt-0.5"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        wikipedia.org
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
                     </div>
-
-                    <div className="flex items-center gap-3">
-                      {/* Owner info or Price */}
-                      {article.owner ? (
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <User className="h-3.5 w-3.5" />
-                          <span className="truncate max-w-[100px]">{article.owner.teamName}</span>
-                          {daysUntilExpiry !== null && (
-                            <span className="text-xs">• {daysUntilExpiry}d</span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="font-bold text-primary">{adjustedPrice} Cr</span>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                  </TableCell>
+                  <TableCell className="text-right text-muted-foreground">{formatViews(article.yesterdayViews)}</TableCell>
+                  <TableCell className="text-right text-muted-foreground">{formatViews(article.weekViews)}</TableCell>
+                  <TableCell className="text-right text-muted-foreground">{formatViews(article.monthViews)}</TableCell>
+                  <TableCell className="text-right text-muted-foreground">{formatViews(article.yearViews)}</TableCell>
+                  <TableCell className="text-right font-bold text-primary">{formatViews(article.weekViews)} Cr</TableCell>
+                </TableRow>
+              ))}
+              {filteredArticles.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                    No articles found matching "{searchQuery}"
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
-
-        {filteredArticles.length === 0 && (
-          <div className="text-center py-12">
-            <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-            <p className="text-muted-foreground">No articles found matching "{searchQuery}"</p>
-          </div>
-        )}
       </main>
 
       <Footer />
 
-      {/* Purchase Dialog */}
       {selectedArticle && !selectedArticle.owner && (
         <ContractPurchaseDialog
           open={showPurchaseDialog}
           onOpenChange={setShowPurchaseDialog}
-          article={selectedArticle}
+          article={{
+            ...selectedArticle,
+            basePrice: selectedArticle.weekViews,
+            views30d: selectedArticle.monthViews,
+            viewsLast7d: selectedArticle.weekViews,
+            viewsPrev7d: selectedArticle.weekViews,
+            trend: "up" as const,
+          }}
           userBalance={userBalance}
           onPurchaseComplete={handlePurchaseComplete}
         />
       )}
 
-      {/* Contract View Dialog */}
       {selectedArticle && selectedArticle.owner && (
         <ArticleContractDialog
           open={showContractDialog}
           onOpenChange={setShowContractDialog}
-          article={selectedArticle}
+          article={{
+            ...selectedArticle,
+            basePrice: selectedArticle.weekViews,
+            views30d: selectedArticle.monthViews,
+            viewsLast7d: selectedArticle.weekViews,
+            viewsPrev7d: selectedArticle.weekViews,
+            trend: "up" as const,
+          }}
         />
       )}
     </div>
