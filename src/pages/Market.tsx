@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Search, ArrowLeft, ExternalLink } from "lucide-react";
+import { Search, ArrowLeft, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { ContractPurchaseDialog } from "@/components/market/ContractPurchaseDialog";
 import { ArticleContractDialog } from "@/components/market/ArticleContractDialog";
 
@@ -32,6 +32,10 @@ const formatViews = (views: number): string => {
 
 const userBalance = 550;
 
+type SortKey = "title" | "status" | "yesterdayViews" | "weekViews" | "monthViews" | "yearViews" | "price";
+type SortDir = "asc" | "desc";
+type StatusFilter = "all" | "free" | "owned";
+
 const Market = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -39,7 +43,26 @@ const Market = () => {
   const [selectedArticle, setSelectedArticle] = useState<typeof mockArticles[0] | null>(null);
   const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
   const [showContractDialog, setShowContractDialog] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>("price");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const searchRef = useRef<HTMLDivElement>(null);
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+  };
+
+  const SortIcon = ({ column }: { column: SortKey }) => {
+    if (sortKey !== column) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-40" />;
+    return sortDir === "asc"
+      ? <ArrowUp className="h-3 w-3 ml-1" />
+      : <ArrowDown className="h-3 w-3 ml-1" />;
+  };
 
   const searchSuggestions = useMemo(() => {
     if (!searchQuery.trim()) return [];
@@ -68,11 +91,36 @@ const Market = () => {
   };
 
   const filteredArticles = useMemo(() => {
-    if (!searchQuery.trim()) return mockArticles;
-    return mockArticles.filter((a) =>
-      a.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery]);
+    let articles = mockArticles;
+
+    if (searchQuery.trim()) {
+      articles = articles.filter((a) =>
+        a.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (statusFilter === "free") {
+      articles = articles.filter((a) => !a.owner);
+    } else if (statusFilter === "owned") {
+      articles = articles.filter((a) => !!a.owner);
+    }
+
+    const sorted = [...articles].sort((a, b) => {
+      let cmp = 0;
+      switch (sortKey) {
+        case "title": cmp = a.title.localeCompare(b.title); break;
+        case "status": cmp = (a.owner ? 1 : 0) - (b.owner ? 1 : 0); break;
+        case "yesterdayViews": cmp = a.yesterdayViews - b.yesterdayViews; break;
+        case "weekViews": cmp = a.weekViews - b.weekViews; break;
+        case "monthViews": cmp = a.monthViews - b.monthViews; break;
+        case "yearViews": cmp = a.yearViews - b.yearViews; break;
+        case "price": cmp = a.weekViews - b.weekViews; break;
+      }
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+
+    return sorted;
+  }, [searchQuery, sortKey, sortDir, statusFilter]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -107,9 +155,9 @@ const Market = () => {
           </div>
         </div>
 
-        {/* Search with Dropdown */}
-        <div className="mb-6 relative" ref={searchRef}>
-          <div className="relative">
+        {/* Search & Status Filter */}
+        <div className="mb-6 flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1" ref={searchRef}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
@@ -120,22 +168,34 @@ const Market = () => {
               onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
               className="pl-10 bg-card border-border h-12"
             />
+            {isSearchFocused && searchQuery.trim() && searchSuggestions.length > 0 && (
+              <div className="absolute z-50 top-full mt-1 w-full rounded-md border border-border bg-popover shadow-lg">
+                {searchSuggestions.map((article) => (
+                  <button
+                    key={article.id}
+                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-accent transition-colors flex items-center justify-between"
+                    onMouseDown={() => handleSuggestionClick(article)}
+                  >
+                    <span className="font-medium text-foreground">{article.title}</span>
+                    <span className="text-xs text-muted-foreground">{formatViews(article.weekViews)} Cr</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-
-          {isSearchFocused && searchQuery.trim() && searchSuggestions.length > 0 && (
-            <div className="absolute z-50 top-full mt-1 w-full rounded-md border border-border bg-popover shadow-lg">
-              {searchSuggestions.map((article) => (
-                <button
-                  key={article.id}
-                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-accent transition-colors flex items-center justify-between"
-                  onMouseDown={() => handleSuggestionClick(article)}
-                >
-                  <span className="font-medium text-foreground">{article.title}</span>
-                  <span className="text-xs text-muted-foreground">{formatViews(article.weekViews)} Cr</span>
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="flex gap-1.5 shrink-0">
+            {(["all", "free", "owned"] as StatusFilter[]).map((f) => (
+              <Button
+                key={f}
+                variant={statusFilter === f ? "default" : "outline"}
+                size="sm"
+                className="h-12 capitalize"
+                onClick={() => setStatusFilter(f)}
+              >
+                {f === "all" ? "All" : f === "free" ? "Free Agents" : "Owned"}
+              </Button>
+            ))}
+          </div>
         </div>
 
         {/* Articles Table */}
@@ -143,13 +203,27 @@ const Market = () => {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead>Article</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Yesterday</TableHead>
-                <TableHead className="text-right">Week</TableHead>
-                <TableHead className="text-right">Month</TableHead>
-                <TableHead className="text-right">Year</TableHead>
-                <TableHead className="text-right">Price</TableHead>
+                <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("title")}>
+                  <span className="flex items-center">Article <SortIcon column="title" /></span>
+                </TableHead>
+                <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("status")}>
+                  <span className="flex items-center">Status <SortIcon column="status" /></span>
+                </TableHead>
+                <TableHead className="cursor-pointer select-none text-right" onClick={() => toggleSort("yesterdayViews")}>
+                  <span className="flex items-center justify-end">Yesterday <SortIcon column="yesterdayViews" /></span>
+                </TableHead>
+                <TableHead className="cursor-pointer select-none text-right" onClick={() => toggleSort("weekViews")}>
+                  <span className="flex items-center justify-end">Week <SortIcon column="weekViews" /></span>
+                </TableHead>
+                <TableHead className="cursor-pointer select-none text-right" onClick={() => toggleSort("monthViews")}>
+                  <span className="flex items-center justify-end">Month <SortIcon column="monthViews" /></span>
+                </TableHead>
+                <TableHead className="cursor-pointer select-none text-right" onClick={() => toggleSort("yearViews")}>
+                  <span className="flex items-center justify-end">Year <SortIcon column="yearViews" /></span>
+                </TableHead>
+                <TableHead className="cursor-pointer select-none text-right" onClick={() => toggleSort("price")}>
+                  <span className="flex items-center justify-end">Price <SortIcon column="price" /></span>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -185,6 +259,7 @@ const Market = () => {
                       </span>
                     )}
                   </TableCell>
+                  <TableCell className="text-right text-muted-foreground">{formatViews(article.yesterdayViews)}</TableCell>
                   <TableCell className="text-right text-muted-foreground">{formatViews(article.weekViews)}</TableCell>
                   <TableCell className="text-right text-muted-foreground">{formatViews(article.monthViews)}</TableCell>
                   <TableCell className="text-right text-muted-foreground">{formatViews(article.yearViews)}</TableCell>
@@ -194,7 +269,7 @@ const Market = () => {
               {filteredArticles.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
-                    No articles found matching "{searchQuery}"
+                    No articles found
                   </TableCell>
                 </TableRow>
               )}
