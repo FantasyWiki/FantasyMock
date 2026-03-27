@@ -225,6 +225,7 @@ const BrowseLeagues = () => {
   }
 
 
+  if (viewMode === "join") {
     return (
       <div className="min-h-screen bg-background">
         <Header />
