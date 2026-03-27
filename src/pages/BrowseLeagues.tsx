@@ -144,7 +144,87 @@ const BrowseLeagues = () => {
     setTimeout(() => setCopiedField(null), 2000);
   };
 
-  if (viewMode === "join") {
+  if (viewMode === "detail" && selectedFeatured) {
+    const domainLabel = wikipediaDomains.find(d => d.value === selectedFeatured.domain)?.label || selectedFeatured.domain;
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-8 pt-24 max-w-2xl">
+          <Button variant="ghost" onClick={() => setViewMode("browse")} className="mb-6 gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Leagues
+          </Button>
+
+          <Card>
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto h-20 w-20 rounded-2xl bg-[hsl(var(--wiki-gold))]/10 flex items-center justify-center text-4xl mb-3">
+                {selectedFeatured.icon}
+              </div>
+              <CardTitle className="text-2xl">{selectedFeatured.name}</CardTitle>
+              <Badge variant="secondary" className="mx-auto mt-2 w-fit">{domainLabel}</Badge>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <Users className="h-5 w-5 mx-auto text-primary mb-1" />
+                  <p className="text-lg font-bold text-foreground">{selectedFeatured.participants.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">Players</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <Calendar className="h-5 w-5 mx-auto text-primary mb-1" />
+                  <p className="text-lg font-bold text-foreground">{selectedFeatured.endsIn}</p>
+                  <p className="text-xs text-muted-foreground">Remaining</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <Globe className="h-5 w-5 mx-auto text-primary mb-1" />
+                  <p className="text-lg font-bold text-foreground">{selectedFeatured.domain.split('.')[0].toUpperCase()}</p>
+                  <p className="text-xs text-muted-foreground">Language</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="font-semibold text-foreground flex items-center gap-2">
+                  <Crown className="h-4 w-4 text-[hsl(var(--wiki-gold))]" />
+                  Top Players
+                </h3>
+                <div className="space-y-2">
+                  {["WikiMaster_Pro", "ArticleKing99", "PageviewHunter"].map((name, i) => (
+                    <div key={name} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-muted-foreground w-6">#{i + 1}</span>
+                        <span className="text-sm font-medium text-foreground">{name}</span>
+                      </div>
+                      <span className="text-sm text-muted-foreground">{(12500 - i * 2300).toLocaleString()} pts</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="font-semibold text-foreground flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-primary" />
+                  League Rules
+                </h3>
+                <ul className="text-sm text-muted-foreground space-y-1.5 list-disc list-inside">
+                  <li>11 articles per team with a salary cap</li>
+                  <li>Weekly scoring based on pageview performance</li>
+                  <li>Free agent market opens daily at midnight UTC</li>
+                  <li>Trade proposals require mutual agreement</li>
+                </ul>
+              </div>
+
+              <Button className="w-full" size="lg">
+                Join {selectedFeatured.name}
+              </Button>
+            </CardContent>
+          </Card>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+
     return (
       <div className="min-h-screen bg-background">
         <Header />
