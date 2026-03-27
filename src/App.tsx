@@ -14,6 +14,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import LeagueDetail from "./pages/LeagueDetail";
 import BrowseLeagues from "./pages/BrowseLeagues";
+import TeamCreation from "./pages/TeamCreation";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/team" element={<Team />} />
               <Route path="/league" element={<LeagueDetail />} />
               <Route path="/leagues" element={<BrowseLeagues />} />
+              <Route path="/team-creation" element={<TeamCreation />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

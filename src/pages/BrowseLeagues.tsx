@@ -112,7 +112,7 @@ const BrowseLeagues = () => {
         description: "You've successfully joined the league. Set up your team now!",
       });
       // Would redirect to team creation page
-      navigate("/team");
+      navigate("/team-creation");
     } else {
       toast({
         title: "Invalid Code",
@@ -320,7 +320,7 @@ const BrowseLeagues = () => {
                     </Button>
                   </div>
                 </div>
-                <Button className="w-full" onClick={() => navigate("/team")}>
+                <Button className="w-full" onClick={() => navigate("/team-creation")}>
                   Set Up Your Team
                 </Button>
               </CardContent>
