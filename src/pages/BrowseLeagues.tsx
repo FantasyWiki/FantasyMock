@@ -87,6 +87,7 @@ const BrowseLeagues = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [createdLeague, setCreatedLeague] = useState<{ code: string; link: string } | null>(null);
   const [copiedField, setCopiedField] = useState<"code" | "link" | null>(null);
+  const [selectedFeatured, setSelectedFeatured] = useState<typeof featuredLeagues[0] | null>(null);
 
   const joinedLeagues = leagues.map((l) => ({
     ...l,
