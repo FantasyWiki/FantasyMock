@@ -33,7 +33,7 @@ import { useLeague, leagues } from "@/contexts/LeagueContext";
 import { leagueInfo } from "@/data/leagueData";
 import { useToast } from "@/hooks/use-toast";
 
-type ViewMode = "browse" | "join" | "create";
+type ViewMode = "browse" | "join" | "create" | "detail";
 
 const wikipediaDomains = [
   { value: "en.wikipedia", label: "English (en.wikipedia)" },
