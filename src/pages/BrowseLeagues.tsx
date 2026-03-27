@@ -483,7 +483,7 @@ const BrowseLeagues = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {filteredFeatured.map((league) => (
-              <Card key={league.id} className="bg-card hover:shadow-md transition-all">
+              <Card key={league.id} className="bg-card hover:shadow-md transition-all cursor-pointer" onClick={() => { setSelectedFeatured(league); setViewMode("detail"); }}>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="h-10 w-10 rounded-lg bg-[hsl(var(--wiki-gold))]/10 flex items-center justify-center text-xl shrink-0">
@@ -504,8 +504,8 @@ const BrowseLeagues = () => {
                       Ends in {league.endsIn}
                     </span>
                   </div>
-                  <Button variant="outline" size="sm" className="w-full">
-                    Join League
+                  <Button variant="outline" size="sm" className="w-full" onClick={(e) => { e.stopPropagation(); setSelectedFeatured(league); setViewMode("detail"); }}>
+                    View Details
                   </Button>
                 </CardContent>
               </Card>
