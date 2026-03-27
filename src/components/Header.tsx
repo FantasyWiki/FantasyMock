@@ -18,7 +18,7 @@ export function Header({ onSignInClick }: HeaderProps) {
   const navLinks = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, isRoute: true, requiresAuth: true },
     { name: "How It Works", href: "#how-it-works", icon: BookOpen, isRoute: false, requiresAuth: false },
-    { name: "Leagues", href: "#leagues", icon: Trophy, isRoute: false, requiresAuth: false },
+    { name: "Leagues", href: "/leagues", icon: Trophy, isRoute: true, requiresAuth: false },
     { name: "Community", href: "#community", icon: Users, isRoute: false, requiresAuth: false },
   ];
 
