@@ -13,6 +13,7 @@ import Team from "./pages/Team";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import LeagueDetail from "./pages/LeagueDetail";
+import BrowseLeagues from "./pages/BrowseLeagues";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
