@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,8 +12,13 @@ import { useToast } from "@/hooks/use-toast";
 
 const TeamCreation = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { currentLeague } = useLeague();
   const { toast } = useToast();
+
+  // Use league from navigation state if available, otherwise fall back to context
+  const leagueFromState = (location.state as any)?.league;
+  const league = leagueFromState || currentLeague;
   const [teamName, setTeamName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -57,7 +62,7 @@ const TeamCreation = () => {
 
     toast({
       title: "Team Created! 🎉",
-      description: `"${trimmed}" is ready to compete in ${currentLeague.name}.`,
+      description: `"${trimmed}" is ready to compete in ${league.name}.`,
     });
 
     navigate("/dashboard");
@@ -70,11 +75,11 @@ const TeamCreation = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center space-y-2">
             <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-3xl">
-              {currentLeague.icon}
+              {league.icon}
             </div>
             <CardTitle className="text-2xl font-bold">Create Your Team</CardTitle>
             <p className="text-muted-foreground text-sm">
-              You're joining <span className="font-semibold text-foreground">{currentLeague.name}</span>. Choose a unique name for your team.
+              You're joining <span className="font-semibold text-foreground">{league.name}</span>. Choose a unique name for your team.
             </p>
           </CardHeader>
           <CardContent>
