@@ -84,10 +84,18 @@ const BrowseLeagues = () => {
   const [leagueName, setLeagueName] = useState("");
   const [leagueDomain, setLeagueDomain] = useState("");
   const [leagueDuration, setLeagueDuration] = useState("");
+  const [leagueIcon, setLeagueIcon] = useState("🏆");
   const [isCreating, setIsCreating] = useState(false);
   const [createdLeague, setCreatedLeague] = useState<{ code: string; link: string } | null>(null);
   const [copiedField, setCopiedField] = useState<"code" | "link" | null>(null);
   const [selectedFeatured, setSelectedFeatured] = useState<typeof featuredLeagues[0] | null>(null);
+  const [showJoinConfirm, setShowJoinConfirm] = useState(false);
+
+  const leagueIcons = [
+    "🏆", "⚽", "🌍", "📚", "🎓", "🔬", "🎨", "🎭",
+    "🌟", "👑", "🏰", "⚡", "🔥", "💎", "🦁", "🐉",
+    "🎯", "🚀", "🌊", "🗡️", "🛡️", "🦅", "🐺", "🎪",
+  ];
 
   const joinedLeagues = leagues.map((l) => ({
     ...l,
@@ -213,9 +221,37 @@ const BrowseLeagues = () => {
                 </ul>
               </div>
 
-              <Button className="w-full" size="lg" onClick={() => navigate("/team-creation", { state: { league: { name: selectedFeatured.name, icon: selectedFeatured.icon } } })}>
+              <Button className="w-full" size="lg" onClick={() => setShowJoinConfirm(true)}>
                 Join {selectedFeatured.name}
               </Button>
+
+              {/* Join Confirmation Dialog */}
+              {showJoinConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowJoinConfirm(false)}>
+                  <Card className="w-full max-w-sm mx-4 shadow-xl" onClick={(e) => e.stopPropagation()}>
+                    <CardHeader className="text-center pb-3">
+                      <div className="mx-auto h-14 w-14 rounded-xl bg-[hsl(var(--wiki-gold))]/10 flex items-center justify-center text-3xl mb-2">
+                        {selectedFeatured.icon}
+                      </div>
+                      <CardTitle className="text-lg">Join {selectedFeatured.name}?</CardTitle>
+                      <p className="text-muted-foreground text-sm mt-1">
+                        You'll be added to this league and redirected to create your team.
+                      </p>
+                    </CardHeader>
+                    <CardContent className="flex gap-3">
+                      <Button variant="outline" className="flex-1" onClick={() => setShowJoinConfirm(false)}>
+                        Cancel
+                      </Button>
+                      <Button className="flex-1" onClick={() => {
+                        setShowJoinConfirm(false);
+                        navigate("/team-creation", { state: { league: { name: selectedFeatured.name, icon: selectedFeatured.icon } } });
+                      }}>
+                        Join League
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </CardContent>
           </Card>
         </main>
@@ -320,7 +356,7 @@ const BrowseLeagues = () => {
                     </Button>
                   </div>
                 </div>
-                <Button className="w-full" onClick={() => navigate("/team-creation", { state: { league: { name: leagueName, icon: "🏆" } } })}>
+                <Button className="w-full" onClick={() => navigate("/team-creation", { state: { league: { name: leagueName, icon: leagueIcon } } })}>
                   Set Up Your Team
                 </Button>
               </CardContent>
@@ -337,6 +373,26 @@ const BrowseLeagues = () => {
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>League Icon</Label>
+                  <div className="grid grid-cols-8 gap-2">
+                    {leagueIcons.map((icon) => (
+                      <button
+                        key={icon}
+                        type="button"
+                        onClick={() => setLeagueIcon(icon)}
+                        className={`h-10 w-10 rounded-lg text-xl flex items-center justify-center transition-all ${
+                          leagueIcon === icon
+                            ? "bg-primary/20 ring-2 ring-primary scale-110"
+                            : "bg-muted/50 hover:bg-muted"
+                        }`}
+                      >
+                        {icon}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="league-name">League Name</Label>
                   <Input
