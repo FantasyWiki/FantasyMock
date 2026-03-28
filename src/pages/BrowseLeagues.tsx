@@ -84,16 +84,37 @@ const BrowseLeagues = () => {
   const [leagueName, setLeagueName] = useState("");
   const [leagueDomain, setLeagueDomain] = useState("");
   const [leagueDuration, setLeagueDuration] = useState("");
+  const [leagueIcon, setLeagueIcon] = useState("🏆");
   const [isCreating, setIsCreating] = useState(false);
   const [createdLeague, setCreatedLeague] = useState<{ code: string; link: string } | null>(null);
   const [copiedField, setCopiedField] = useState<"code" | "link" | null>(null);
   const [selectedFeatured, setSelectedFeatured] = useState<typeof featuredLeagues[0] | null>(null);
+
+  const leagueIcons = [
+    "🏆", "⚽", "🌍", "📚", "🔬", "🎮", "🏀", "🎯",
+    "⭐", "🦁", "🐉", "🔥", "💎", "🛡️", "⚔️", "🎪",
+    "🚀", "🌟", "🏅", "👑", "🦅", "🐺", "🎭", "🌊",
+  ];
+
+  const [exitingLeagueId, setExitingLeagueId] = useState<string | null>(null);
 
   const joinedLeagues = leagues.map((l) => ({
     ...l,
     participants: leagueInfo[l.id]?.totalPlayers || 0,
     language: leagueInfo[l.id]?.language || "English",
   }));
+
+  const handleExitLeague = (e: React.MouseEvent, leagueId: string, leagueName: string) => {
+    e.stopPropagation();
+    setExitingLeagueId(leagueId);
+    setTimeout(() => {
+      setExitingLeagueId(null);
+      toast({
+        title: "Left League",
+        description: `You have left "${leagueName}".`,
+      });
+    }, 800);
+  };
 
   const filteredFeatured = featuredLeagues.filter((l) =>
     l.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -320,7 +341,7 @@ const BrowseLeagues = () => {
                     </Button>
                   </div>
                 </div>
-                <Button className="w-full" onClick={() => navigate("/team-creation", { state: { league: { name: leagueName, icon: "🏆" } } })}>
+                <Button className="w-full" onClick={() => navigate("/team-creation", { state: { league: { name: leagueName, icon: leagueIcon } } })}>
                   Set Up Your Team
                 </Button>
               </CardContent>
@@ -337,6 +358,26 @@ const BrowseLeagues = () => {
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>League Logo</Label>
+                  <div className="grid grid-cols-8 gap-2">
+                    {leagueIcons.map((icon) => (
+                      <button
+                        key={icon}
+                        type="button"
+                        onClick={() => setLeagueIcon(icon)}
+                        className={`h-10 w-10 rounded-lg flex items-center justify-center text-xl transition-all ${
+                          leagueIcon === icon
+                            ? "bg-primary/20 ring-2 ring-primary scale-110"
+                            : "bg-muted/50 hover:bg-muted"
+                        }`}
+                      >
+                        {icon}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="league-name">League Name</Label>
                   <Input
@@ -441,7 +482,7 @@ const BrowseLeagues = () => {
                   <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-xl shrink-0">
                     {league.icon}
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <p className="font-medium text-foreground truncate">{league.name}</p>
                       {currentLeague.id === league.id && (
@@ -459,6 +500,15 @@ const BrowseLeagues = () => {
                       </span>
                     </div>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10 text-xs"
+                    disabled={exitingLeagueId === league.id}
+                    onClick={(e) => handleExitLeague(e, league.id, league.name)}
+                  >
+                    {exitingLeagueId === league.id ? "Leaving..." : "Exit"}
+                  </Button>
                 </CardContent>
               </Card>
             ))}
