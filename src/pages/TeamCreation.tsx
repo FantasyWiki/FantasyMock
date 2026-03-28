@@ -20,8 +20,15 @@ const TeamCreation = () => {
   const leagueFromState = (location.state as any)?.league;
   const league = leagueFromState || currentLeague;
   const [teamName, setTeamName] = useState("");
+  const [selectedAvatar, setSelectedAvatar] = useState("⚔️");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const teamAvatars = [
+    "⚔️", "🛡️", "🦁", "🐉", "🦅", "🐺", "🔥", "⚡",
+    "🌟", "👑", "🏰", "🎯", "🚀", "💎", "🦊", "🐻",
+    "🦈", "🐍", "🦂", "🎭", "🗡️", "🏹", "⛵", "🌊",
+  ];
 
   // Mock existing team names for uniqueness check
   const existingTeamNames = [
