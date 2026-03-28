@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,8 +12,13 @@ import { useToast } from "@/hooks/use-toast";
 
 const TeamCreation = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { currentLeague } = useLeague();
   const { toast } = useToast();
+
+  // Use league from navigation state if available, otherwise fall back to context
+  const leagueFromState = (location.state as any)?.league;
+  const league = leagueFromState || currentLeague;
   const [teamName, setTeamName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
