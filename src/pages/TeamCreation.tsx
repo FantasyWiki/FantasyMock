@@ -82,38 +82,15 @@ const TeamCreation = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center space-y-2">
             <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-3xl">
-              {selectedAvatar}
+              {league.icon}
             </div>
             <CardTitle className="text-2xl font-bold">Create Your Team</CardTitle>
             <p className="text-muted-foreground text-sm">
-              You're joining <span className="font-semibold text-foreground">{league.name}</span>. Pick a logo and choose a unique name.
+              You're joining <span className="font-semibold text-foreground">{league.name}</span>. Choose a unique name for your team.
             </p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-primary" />
-                  Team Logo
-                </Label>
-                <div className="grid grid-cols-8 gap-2">
-                  {teamAvatars.map((avatar) => (
-                    <button
-                      key={avatar}
-                      type="button"
-                      onClick={() => setSelectedAvatar(avatar)}
-                      className={`h-10 w-10 rounded-lg text-xl flex items-center justify-center transition-all ${
-                        selectedAvatar === avatar
-                          ? "bg-primary/20 ring-2 ring-primary scale-110"
-                          : "bg-muted/50 hover:bg-muted"
-                      }`}
-                    >
-                      {avatar}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               <div className="space-y-2">
                 <Label htmlFor="teamName" className="flex items-center gap-2">
                   <Shield className="h-4 w-4 text-primary" />
