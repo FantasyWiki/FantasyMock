@@ -1,4 +1,4 @@
-import { BookOpen, Trophy, Users, LayoutDashboard, LogIn } from "lucide-react";
+import { BookOpen, Trophy, ShoppingCart, LayoutDashboard, LogIn } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./ThemeToggle";
@@ -19,7 +19,7 @@ export function Header({ onSignInClick }: HeaderProps) {
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, isRoute: true, requiresAuth: true },
     { name: "How It Works", href: "#how-it-works", icon: BookOpen, isRoute: false, requiresAuth: false },
     { name: "Leagues", href: "/leagues", icon: Trophy, isRoute: true, requiresAuth: false },
-    { name: "Community", href: "#community", icon: Users, isRoute: false, requiresAuth: false },
+    { name: "Market", href: "/market", icon: ShoppingCart, isRoute: true, requiresAuth: false },
   ];
 
   const handleNavClick = (link: typeof navLinks[0], e: React.MouseEvent) => {
