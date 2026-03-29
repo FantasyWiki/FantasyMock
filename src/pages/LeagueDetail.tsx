@@ -4,6 +4,17 @@ import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -162,15 +173,35 @@ const LeagueDetail = () => {
                 </p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
-              onClick={handleExitLeague}
-              disabled={isExiting}
-            >
-              <LogOut className="h-4 w-4" />
-              {isExiting ? "Leaving..." : "Exit League"}
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+                  disabled={isExiting}
+                >
+                  <LogOut className="h-4 w-4" />
+                  {isExiting ? "Leaving..." : "Exit League"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Leave {currentLeague.name}?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will remove you from the league. Your team and progress will be lost. You can rejoin later with an invitation code.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleExitLeague}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Leave League
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
 
           {/* League Stats */}
