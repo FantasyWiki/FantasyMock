@@ -97,6 +97,10 @@ const BrowseLeagues = () => {
   ];
 
   const joinedLeagues = leagues.map((l) => ({
+    ...l,
+    participants: leagueInfo[l.id]?.totalPlayers || 0,
+    language: leagueInfo[l.id]?.language || "English",
+  }));
 
   const filteredFeatured = featuredLeagues.filter((l) =>
     l.name.toLowerCase().includes(searchQuery.toLowerCase())
