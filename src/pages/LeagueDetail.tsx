@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +12,8 @@ import {
   TrendingUp, 
   TrendingDown, 
   Crown, 
-  Medal, 
+  Medal,
+  LogOut,
   Users, 
   Globe, 
   Calendar,
@@ -43,11 +45,25 @@ const getRankIcon = (rank: number) => {
 
 const LeagueDetail = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { currentLeague } = useLeague();
   const [viewMode, setViewMode] = useState<ViewMode>("around-me");
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isExiting, setIsExiting] = useState(false);
+
+  const handleExitLeague = () => {
+    setIsExiting(true);
+    setTimeout(() => {
+      setIsExiting(false);
+      toast({
+        title: "Left League",
+        description: `You have left "${currentLeague.name}".`,
+      });
+      navigate("/leagues");
+    }, 800);
+  };
 
   const currentLeagueInfo = useMemo(() => {
     return leagueInfo[currentLeague.id] || leagueInfo.global;
