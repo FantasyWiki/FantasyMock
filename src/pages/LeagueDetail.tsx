@@ -148,18 +148,29 @@ const LeagueDetail = () => {
 
         {/* League Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="h-16 w-16 rounded-xl bg-[hsl(var(--wiki-gold))]/20 flex items-center justify-center text-3xl">
-              {currentLeague.icon}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 rounded-xl bg-[hsl(var(--wiki-gold))]/20 flex items-center justify-center text-3xl">
+                {currentLeague.icon}
+              </div>
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+                  {currentLeague.name}
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  {currentLeagueInfo.description}
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-                {currentLeague.name}
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                {currentLeagueInfo.description}
-              </p>
-            </div>
+            <Button
+              variant="outline"
+              className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+              onClick={handleExitLeague}
+              disabled={isExiting}
+            >
+              <LogOut className="h-4 w-4" />
+              {isExiting ? "Leaving..." : "Exit League"}
+            </Button>
           </div>
 
           {/* League Stats */}
