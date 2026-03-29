@@ -96,25 +96,11 @@ const BrowseLeagues = () => {
     "🚀", "🌟", "🏅", "👑", "🦅", "🐺", "🎭", "🌊",
   ];
 
-  const [exitingLeagueId, setExitingLeagueId] = useState<string | null>(null);
-
   const joinedLeagues = leagues.map((l) => ({
     ...l,
     participants: leagueInfo[l.id]?.totalPlayers || 0,
     language: leagueInfo[l.id]?.language || "English",
   }));
-
-  const handleExitLeague = (e: React.MouseEvent, leagueId: string, leagueName: string) => {
-    e.stopPropagation();
-    setExitingLeagueId(leagueId);
-    setTimeout(() => {
-      setExitingLeagueId(null);
-      toast({
-        title: "Left League",
-        description: `You have left "${leagueName}".`,
-      });
-    }, 800);
-  };
 
   const filteredFeatured = featuredLeagues.filter((l) =>
     l.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -500,15 +486,6 @@ const BrowseLeagues = () => {
                       </span>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10 text-xs"
-                    disabled={exitingLeagueId === league.id}
-                    onClick={(e) => handleExitLeague(e, league.id, league.name)}
-                  >
-                    {exitingLeagueId === league.id ? "Leaving..." : "Exit"}
-                  </Button>
                 </CardContent>
               </Card>
             ))}
