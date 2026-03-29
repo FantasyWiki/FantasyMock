@@ -7,9 +7,12 @@ import { Button } from "@/components/ui/button";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Search, ArrowLeft, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Search, ArrowLeft, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, Eye, TrendingUp } from "lucide-react";
 import { ContractPurchaseDialog } from "@/components/market/ContractPurchaseDialog";
 import { ArticleContractDialog } from "@/components/market/ArticleContractDialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const mockArticles = [
   { id: 1, title: "Bitcoin", slug: "Bitcoin", yesterdayViews: 4800, weekViews: 35000, monthViews: 125000, yearViews: 1500000, owner: null, expiresAt: null },
@@ -38,6 +41,7 @@ type StatusFilter = "all" | "free" | "owned";
 
 const Market = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<typeof mockArticles[0] | null>(null);
@@ -198,84 +202,174 @@ const Market = () => {
           </div>
         </div>
 
-        {/* Articles Table */}
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("title")}>
-                  <span className="flex items-center">Article <SortIcon column="title" /></span>
-                </TableHead>
-                <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("status")}>
-                  <span className="flex items-center">Status <SortIcon column="status" /></span>
-                </TableHead>
-                <TableHead className="cursor-pointer select-none text-right" onClick={() => toggleSort("yesterdayViews")}>
-                  <span className="flex items-center justify-end">Yesterday <SortIcon column="yesterdayViews" /></span>
-                </TableHead>
-                <TableHead className="cursor-pointer select-none text-right" onClick={() => toggleSort("weekViews")}>
-                  <span className="flex items-center justify-end">Week <SortIcon column="weekViews" /></span>
-                </TableHead>
-                <TableHead className="cursor-pointer select-none text-right" onClick={() => toggleSort("monthViews")}>
-                  <span className="flex items-center justify-end">Month <SortIcon column="monthViews" /></span>
-                </TableHead>
-                <TableHead className="cursor-pointer select-none text-right" onClick={() => toggleSort("yearViews")}>
-                  <span className="flex items-center justify-end">Year <SortIcon column="yearViews" /></span>
-                </TableHead>
-                <TableHead className="cursor-pointer select-none text-right" onClick={() => toggleSort("price")}>
-                  <span className="flex items-center justify-end">Price <SortIcon column="price" /></span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredArticles.map((article) => (
-                <TableRow
-                  key={article.id}
-                  className="cursor-pointer"
-                  onClick={() => handleArticleClick(article)}
+        {/* Articles - Desktop Table */}
+        {!isMobile ? (
+          <div className="rounded-lg border border-border bg-card overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("title")}>
+                    <span className="flex items-center">Article <SortIcon column="title" /></span>
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("status")}>
+                    <span className="flex items-center">Status <SortIcon column="status" /></span>
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none text-right" onClick={() => toggleSort("yesterdayViews")}>
+                    <span className="flex items-center justify-end">Yesterday <SortIcon column="yesterdayViews" /></span>
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none text-right" onClick={() => toggleSort("weekViews")}>
+                    <span className="flex items-center justify-end">Week <SortIcon column="weekViews" /></span>
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none text-right" onClick={() => toggleSort("monthViews")}>
+                    <span className="flex items-center justify-end">Month <SortIcon column="monthViews" /></span>
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none text-right" onClick={() => toggleSort("yearViews")}>
+                    <span className="flex items-center justify-end">Year <SortIcon column="yearViews" /></span>
+                  </TableHead>
+                  <TableHead className="cursor-pointer select-none text-right" onClick={() => toggleSort("price")}>
+                    <span className="flex items-center justify-end">Price <SortIcon column="price" /></span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredArticles.map((article) => (
+                  <TableRow
+                    key={article.id}
+                    className="cursor-pointer"
+                    onClick={() => handleArticleClick(article)}
+                  >
+                    <TableCell>
+                      <div>
+                        <span className="font-medium text-foreground">{article.title}</span>
+                        <a
+                          href={`https://en.wikipedia.org/wiki/${article.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors mt-0.5"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          wikipedia.org
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {article.owner ? (
+                        <span className="text-xs font-medium text-accent-foreground bg-accent px-2 py-1 rounded-full">
+                          {article.owner.name}
+                        </span>
+                      ) : (
+                        <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
+                          Free Agent
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right text-muted-foreground">{formatViews(article.yesterdayViews)}</TableCell>
+                    <TableCell className="text-right text-muted-foreground">{formatViews(article.weekViews)}</TableCell>
+                    <TableCell className="text-right text-muted-foreground">{formatViews(article.monthViews)}</TableCell>
+                    <TableCell className="text-right text-muted-foreground">{formatViews(article.yearViews)}</TableCell>
+                    <TableCell className="text-right font-bold text-primary">{formatViews(article.weekViews)} Cr</TableCell>
+                  </TableRow>
+                ))}
+                {filteredArticles.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                      No articles found
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        ) : (
+          /* Articles - Mobile Cards */
+          <div className="flex flex-col gap-3">
+            {/* Mobile Sort Controls */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              <span className="text-xs text-muted-foreground shrink-0">Sort:</span>
+              {([
+                { key: "price" as SortKey, label: "Price" },
+                { key: "yesterdayViews" as SortKey, label: "Yesterday" },
+                { key: "weekViews" as SortKey, label: "Week" },
+                { key: "monthViews" as SortKey, label: "Month" },
+              ]).map(({ key, label }) => (
+                <Button
+                  key={key}
+                  variant={sortKey === key ? "default" : "outline"}
+                  size="sm"
+                  className="h-7 text-xs shrink-0"
+                  onClick={() => toggleSort(key)}
                 >
-                  <TableCell>
-                    <div>
-                      <span className="font-medium text-foreground">{article.title}</span>
+                  {label}
+                  {sortKey === key && (
+                    sortDir === "asc" ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />
+                  )}
+                </Button>
+              ))}
+            </div>
+
+            {filteredArticles.map((article) => (
+              <Card
+                key={article.id}
+                className="cursor-pointer hover:bg-accent/50 transition-colors"
+                onClick={() => handleArticleClick(article)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-foreground text-sm truncate">{article.title}</h3>
                       <a
                         href={`https://en.wikipedia.org/wiki/${article.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors mt-0.5"
+                        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
                         onClick={(e) => e.stopPropagation()}
                       >
                         wikipedia.org
                         <ExternalLink className="h-3 w-3" />
                       </a>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    {article.owner ? (
-                      <span className="text-xs font-medium text-accent-foreground bg-accent px-2 py-1 rounded-full">
-                        {article.owner.name}
-                      </span>
-                    ) : (
-                      <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
-                        Free Agent
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right text-muted-foreground">{formatViews(article.yesterdayViews)}</TableCell>
-                  <TableCell className="text-right text-muted-foreground">{formatViews(article.weekViews)}</TableCell>
-                  <TableCell className="text-right text-muted-foreground">{formatViews(article.monthViews)}</TableCell>
-                  <TableCell className="text-right text-muted-foreground">{formatViews(article.yearViews)}</TableCell>
-                  <TableCell className="text-right font-bold text-primary">{formatViews(article.weekViews)} Cr</TableCell>
-                </TableRow>
-              ))}
-              {filteredArticles.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
-                    No articles found
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-bold text-primary">{formatViews(article.weekViews)} Cr</p>
+                      {article.owner ? (
+                        <Badge variant="secondary" className="text-[10px] mt-1">
+                          {article.owner.name}
+                        </Badge>
+                      ) : (
+                        <Badge className="text-[10px] mt-1 bg-primary/10 text-primary hover:bg-primary/20 border-0">
+                          Free Agent
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2 text-center">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Yesterday</p>
+                      <p className="text-sm font-medium text-foreground">{formatViews(article.yesterdayViews)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Week</p>
+                      <p className="text-sm font-medium text-foreground">{formatViews(article.weekViews)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Month</p>
+                      <p className="text-sm font-medium text-foreground">{formatViews(article.monthViews)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Year</p>
+                      <p className="text-sm font-medium text-foreground">{formatViews(article.yearViews)}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            {filteredArticles.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                No articles found
+              </div>
+            )}
+          </div>
+        )}
       </main>
 
       <Footer />
