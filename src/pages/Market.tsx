@@ -153,10 +153,10 @@ const Market = () => {
           <div className="flex items-center justify-between gap-3">
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl md:text-4xl font-bold text-foreground truncate">
-                Article Market
+                <span className="mr-2">{currentLeague.icon}</span>Article Market
               </h1>
               <p className="text-sm text-muted-foreground hidden sm:block">
-                Search and purchase Wikipedia articles
+                {currentLeague.name} — Search and purchase Wikipedia articles
               </p>
             </div>
             <div className="flex items-center gap-1.5 bg-card px-3 py-1.5 rounded-lg border border-border shrink-0">
