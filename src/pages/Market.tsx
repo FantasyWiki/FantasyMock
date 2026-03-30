@@ -183,7 +183,7 @@ const Market = () => {
               type="text"
               placeholder="Search articles..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
               className="pl-10 bg-card border-border h-12"
@@ -210,7 +210,7 @@ const Market = () => {
                 variant={statusFilter === f ? "default" : "outline"}
                 size="sm"
                 className="h-12 capitalize"
-                onClick={() => setStatusFilter(f)}
+                onClick={() => handleFilterChange(f)}
               >
                 {f === "all" ? "All" : f === "free" ? "Free Agents" : "Owned"}
               </Button>
