@@ -13,19 +13,8 @@ import { Search, ArrowLeft, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, Eye, 
 import { ContractPurchaseDialog } from "@/components/market/ContractPurchaseDialog";
 import { ArticleContractDialog } from "@/components/market/ArticleContractDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-const mockArticles = [
-  { id: 1, title: "Bitcoin", slug: "Bitcoin", yesterdayViews: 4800, weekViews: 35000, monthViews: 125000, yearViews: 1500000, owner: null, expiresAt: null },
-  { id: 2, title: "Ethereum", slug: "Ethereum", yesterdayViews: 3200, weekViews: 22000, monthViews: 95000, yearViews: 1100000, owner: null, expiresAt: null },
-  { id: 3, title: "Artificial Intelligence", slug: "Artificial_intelligence", yesterdayViews: 11000, weekViews: 75000, monthViews: 250000, yearViews: 3200000, owner: { name: "CryptoKing42", teamName: "Tech Titans" }, expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) },
-  { id: 4, title: "Machine Learning", slug: "Machine_learning", yesterdayViews: 2600, weekViews: 18000, monthViews: 80000, yearViews: 960000, owner: null, expiresAt: null },
-  { id: 5, title: "Blockchain", slug: "Blockchain", yesterdayViews: 4200, weekViews: 30000, monthViews: 110000, yearViews: 1300000, owner: { name: "WikiMaster", teamName: "Knowledge Base" }, expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000) },
-  { id: 6, title: "Cryptocurrency", slug: "Cryptocurrency", yesterdayViews: 6500, weekViews: 45000, monthViews: 180000, yearViews: 2100000, owner: null, expiresAt: null },
-  { id: 7, title: "Satoshi Nakamoto", slug: "Satoshi_Nakamoto", yesterdayViews: 1700, weekViews: 12000, monthViews: 45000, yearViews: 540000, owner: null, expiresAt: null },
-  { id: 8, title: "Cloud Computing", slug: "Cloud_computing", yesterdayViews: 4600, weekViews: 32000, monthViews: 130000, yearViews: 1560000, owner: null, expiresAt: null },
-  { id: 9, title: "NFT", slug: "Non-fungible_token", yesterdayViews: 2100, weekViews: 15000, monthViews: 65000, yearViews: 780000, owner: { name: "ArtCollector", teamName: "Digital Dreams" }, expiresAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) },
-  { id: 10, title: "Smart Contract", slug: "Smart_contract", yesterdayViews: 2000, weekViews: 14000, monthViews: 55000, yearViews: 660000, owner: null, expiresAt: null },
-];
+import { useLeague } from "@/contexts/LeagueContext";
+import { getMarketArticles, type MarketArticle } from "@/data/leagueData";
 
 const formatViews = (views: number): string => {
   if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`;
