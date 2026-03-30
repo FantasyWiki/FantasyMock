@@ -13,19 +13,8 @@ import { Search, ArrowLeft, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, Eye, 
 import { ContractPurchaseDialog } from "@/components/market/ContractPurchaseDialog";
 import { ArticleContractDialog } from "@/components/market/ArticleContractDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-const mockArticles = [
-  { id: 1, title: "Bitcoin", slug: "Bitcoin", yesterdayViews: 4800, weekViews: 35000, monthViews: 125000, yearViews: 1500000, owner: null, expiresAt: null },
-  { id: 2, title: "Ethereum", slug: "Ethereum", yesterdayViews: 3200, weekViews: 22000, monthViews: 95000, yearViews: 1100000, owner: null, expiresAt: null },
-  { id: 3, title: "Artificial Intelligence", slug: "Artificial_intelligence", yesterdayViews: 11000, weekViews: 75000, monthViews: 250000, yearViews: 3200000, owner: { name: "CryptoKing42", teamName: "Tech Titans" }, expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) },
-  { id: 4, title: "Machine Learning", slug: "Machine_learning", yesterdayViews: 2600, weekViews: 18000, monthViews: 80000, yearViews: 960000, owner: null, expiresAt: null },
-  { id: 5, title: "Blockchain", slug: "Blockchain", yesterdayViews: 4200, weekViews: 30000, monthViews: 110000, yearViews: 1300000, owner: { name: "WikiMaster", teamName: "Knowledge Base" }, expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000) },
-  { id: 6, title: "Cryptocurrency", slug: "Cryptocurrency", yesterdayViews: 6500, weekViews: 45000, monthViews: 180000, yearViews: 2100000, owner: null, expiresAt: null },
-  { id: 7, title: "Satoshi Nakamoto", slug: "Satoshi_Nakamoto", yesterdayViews: 1700, weekViews: 12000, monthViews: 45000, yearViews: 540000, owner: null, expiresAt: null },
-  { id: 8, title: "Cloud Computing", slug: "Cloud_computing", yesterdayViews: 4600, weekViews: 32000, monthViews: 130000, yearViews: 1560000, owner: null, expiresAt: null },
-  { id: 9, title: "NFT", slug: "Non-fungible_token", yesterdayViews: 2100, weekViews: 15000, monthViews: 65000, yearViews: 780000, owner: { name: "ArtCollector", teamName: "Digital Dreams" }, expiresAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) },
-  { id: 10, title: "Smart Contract", slug: "Smart_contract", yesterdayViews: 2000, weekViews: 14000, monthViews: 55000, yearViews: 660000, owner: null, expiresAt: null },
-];
+import { useLeague } from "@/contexts/LeagueContext";
+import { getMarketArticles, type MarketArticle } from "@/data/leagueData";
 
 const formatViews = (views: number): string => {
   if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`;
@@ -44,9 +33,11 @@ const ITEMS_PER_PAGE = 10;
 const Market = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { currentLeague } = useLeague();
+  const articles = useMemo(() => getMarketArticles(currentLeague.id), [currentLeague.id]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [selectedArticle, setSelectedArticle] = useState<typeof mockArticles[0] | null>(null);
+  const [selectedArticle, setSelectedArticle] = useState<MarketArticle | null>(null);
   const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
   const [showContractDialog, setShowContractDialog] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("price");
@@ -73,12 +64,12 @@ const Market = () => {
 
   const searchSuggestions = useMemo(() => {
     if (!searchQuery.trim()) return [];
-    return mockArticles
+    return articles
       .filter((a) => a.title.toLowerCase().includes(searchQuery.toLowerCase()))
       .slice(0, 5);
-  }, [searchQuery]);
+  }, [searchQuery, articles]);
 
-  const handleArticleClick = (article: typeof mockArticles[0]) => {
+  const handleArticleClick = (article: MarketArticle) => {
     setSelectedArticle(article);
     if (article.owner) {
       setShowContractDialog(true);
@@ -87,7 +78,7 @@ const Market = () => {
     }
   };
 
-  const handleSuggestionClick = (article: typeof mockArticles[0]) => {
+  const handleSuggestionClick = (article: MarketArticle) => {
     setSearchQuery(article.title);
     setIsSearchFocused(false);
   };
@@ -104,21 +95,21 @@ const Market = () => {
   }, []);
 
   const filteredArticles = useMemo(() => {
-    let articles = mockArticles;
+    let filtered = [...articles];
 
     if (searchQuery.trim()) {
-      articles = articles.filter((a) =>
+      filtered = filtered.filter((a) =>
         a.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     if (statusFilter === "free") {
-      articles = articles.filter((a) => !a.owner);
+      filtered = filtered.filter((a) => !a.owner);
     } else if (statusFilter === "owned") {
-      articles = articles.filter((a) => !!a.owner);
+      filtered = filtered.filter((a) => !!a.owner);
     }
 
-    const sorted = [...articles].sort((a, b) => {
+    filtered.sort((a, b) => {
       let cmp = 0;
       switch (sortKey) {
         case "title": cmp = a.title.localeCompare(b.title); break;
@@ -132,8 +123,8 @@ const Market = () => {
       return sortDir === "asc" ? cmp : -cmp;
     });
 
-    return sorted;
-  }, [searchQuery, sortKey, sortDir, statusFilter]);
+    return filtered;
+  }, [articles, searchQuery, sortKey, sortDir, statusFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filteredArticles.length / ITEMS_PER_PAGE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
@@ -162,10 +153,10 @@ const Market = () => {
           <div className="flex items-center justify-between gap-3">
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl md:text-4xl font-bold text-foreground truncate">
-                Article Market
+                <span className="mr-2">{currentLeague.icon}</span>Article Market
               </h1>
               <p className="text-sm text-muted-foreground hidden sm:block">
-                Search and purchase Wikipedia articles
+                {currentLeague.name} — Search and purchase Wikipedia articles
               </p>
             </div>
             <div className="flex items-center gap-1.5 bg-card px-3 py-1.5 rounded-lg border border-border shrink-0">
