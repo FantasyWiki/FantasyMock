@@ -95,21 +95,21 @@ const Market = () => {
   }, []);
 
   const filteredArticles = useMemo(() => {
-    let filtered = articles;
+    let filtered = [...articles];
 
     if (searchQuery.trim()) {
-      articles = articles.filter((a) =>
+      filtered = filtered.filter((a) =>
         a.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     if (statusFilter === "free") {
-      articles = articles.filter((a) => !a.owner);
+      filtered = filtered.filter((a) => !a.owner);
     } else if (statusFilter === "owned") {
-      articles = articles.filter((a) => !!a.owner);
+      filtered = filtered.filter((a) => !!a.owner);
     }
 
-    const sorted = [...articles].sort((a, b) => {
+    filtered.sort((a, b) => {
       let cmp = 0;
       switch (sortKey) {
         case "title": cmp = a.title.localeCompare(b.title); break;
@@ -123,8 +123,8 @@ const Market = () => {
       return sortDir === "asc" ? cmp : -cmp;
     });
 
-    return sorted;
-  }, [searchQuery, sortKey, sortDir, statusFilter]);
+    return filtered;
+  }, [articles, searchQuery, sortKey, sortDir, statusFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filteredArticles.length / ITEMS_PER_PAGE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
