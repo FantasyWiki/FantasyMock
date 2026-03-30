@@ -248,7 +248,7 @@ const Market = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredArticles.map((article) => (
+                {paginatedArticles.map((article) => (
                   <TableRow
                     key={article.id}
                     className="cursor-pointer"
