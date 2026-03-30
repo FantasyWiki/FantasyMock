@@ -324,7 +324,7 @@ const Market = () => {
               ))}
             </div>
 
-            {filteredArticles.map((article) => (
+            {paginatedArticles.map((article) => (
               <Card
                 key={article.id}
                 className="cursor-pointer hover:bg-accent/50 transition-colors"
@@ -384,6 +384,59 @@ const Market = () => {
                 No articles found
               </div>
             )}
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-6 mb-4">
+            <p className="text-sm text-muted-foreground">
+              Showing {(safeCurrentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(safeCurrentPage * ITEMS_PER_PAGE, filteredArticles.length)} of {filteredArticles.length}
+            </p>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={safeCurrentPage <= 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter((page) => {
+                  if (totalPages <= 5) return true;
+                  if (page === 1 || page === totalPages) return true;
+                  return Math.abs(page - safeCurrentPage) <= 1;
+                })
+                .reduce<(number | "ellipsis")[]>((acc, page, idx, arr) => {
+                  if (idx > 0 && page - (arr[idx - 1] as number) > 1) acc.push("ellipsis");
+                  acc.push(page);
+                  return acc;
+                }, [])
+                .map((item, idx) =>
+                  item === "ellipsis" ? (
+                    <span key={`e-${idx}`} className="px-2 text-muted-foreground text-sm">…</span>
+                  ) : (
+                    <Button
+                      key={item}
+                      variant={safeCurrentPage === item ? "default" : "outline"}
+                      size="sm"
+                      className="w-9"
+                      onClick={() => setCurrentPage(item as number)}
+                    >
+                      {item}
+                    </Button>
+                  )
+                )}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={safeCurrentPage >= totalPages}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         )}
       </main>
