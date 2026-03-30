@@ -33,9 +33,11 @@ const ITEMS_PER_PAGE = 10;
 const Market = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { currentLeague } = useLeague();
+  const articles = useMemo(() => getMarketArticles(currentLeague.id), [currentLeague.id]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [selectedArticle, setSelectedArticle] = useState<typeof mockArticles[0] | null>(null);
+  const [selectedArticle, setSelectedArticle] = useState<MarketArticle | null>(null);
   const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
   const [showContractDialog, setShowContractDialog] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("price");
@@ -62,12 +64,12 @@ const Market = () => {
 
   const searchSuggestions = useMemo(() => {
     if (!searchQuery.trim()) return [];
-    return mockArticles
+    return articles
       .filter((a) => a.title.toLowerCase().includes(searchQuery.toLowerCase()))
       .slice(0, 5);
-  }, [searchQuery]);
+  }, [searchQuery, articles]);
 
-  const handleArticleClick = (article: typeof mockArticles[0]) => {
+  const handleArticleClick = (article: MarketArticle) => {
     setSelectedArticle(article);
     if (article.owner) {
       setShowContractDialog(true);
@@ -76,7 +78,7 @@ const Market = () => {
     }
   };
 
-  const handleSuggestionClick = (article: typeof mockArticles[0]) => {
+  const handleSuggestionClick = (article: MarketArticle) => {
     setSearchQuery(article.title);
     setIsSearchFocused(false);
   };
@@ -93,7 +95,7 @@ const Market = () => {
   }, []);
 
   const filteredArticles = useMemo(() => {
-    let articles = mockArticles;
+    let filtered = articles;
 
     if (searchQuery.trim()) {
       articles = articles.filter((a) =>
