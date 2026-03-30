@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, ArrowLeft, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, Eye, TrendingUp } from "lucide-react";
+import { Search, ArrowLeft, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, Eye, TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { ContractPurchaseDialog } from "@/components/market/ContractPurchaseDialog";
 import { ArticleContractDialog } from "@/components/market/ArticleContractDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -39,6 +39,8 @@ type SortKey = "title" | "status" | "yesterdayViews" | "weekViews" | "monthViews
 type SortDir = "asc" | "desc";
 type StatusFilter = "all" | "free" | "owned";
 
+const ITEMS_PER_PAGE = 10;
+
 const Market = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -51,6 +53,7 @@ const Market = () => {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const searchRef = useRef<HTMLDivElement>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -94,6 +97,12 @@ const Market = () => {
     setSelectedArticle(null);
   };
 
+  // Reset page when filters change
+  const handleFilterChange = useCallback((filter: StatusFilter) => {
+    setStatusFilter(filter);
+    setCurrentPage(1);
+  }, []);
+
   const filteredArticles = useMemo(() => {
     let articles = mockArticles;
 
@@ -125,6 +134,13 @@ const Market = () => {
 
     return sorted;
   }, [searchQuery, sortKey, sortDir, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredArticles.length / ITEMS_PER_PAGE));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedArticles = filteredArticles.slice(
+    (safeCurrentPage - 1) * ITEMS_PER_PAGE,
+    safeCurrentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <div className="min-h-screen bg-background">
