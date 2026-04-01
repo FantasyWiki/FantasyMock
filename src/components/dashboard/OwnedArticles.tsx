@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Separator } from "@/components/ui/separator";
 import { FileText, TrendingUp, TrendingDown, Clock, RotateCcw, AlertTriangle, ArrowRightLeft, Coins, Calendar, Plus, CheckCircle, XCircle } from "lucide-react";
 import { useLeague } from "@/contexts/LeagueContext";
-import { useTradeProposals } from "@/contexts/TradeProposalsContext";
+import { useNotifications } from "@/contexts/NotificationsContext";
 
 interface OwnedArticlesProps {
   onBuyArticles?: () => void;
@@ -123,17 +123,17 @@ const getTierBadge = (tier: string) => {
 
 export const OwnedArticles = ({ onBuyArticles }: OwnedArticlesProps) => {
   const { currentLeague } = useLeague();
-  const { proposals } = useTradeProposals();
+  const { notifications } = useNotifications();
   const [selectedArticle, setSelectedArticle] = useState<OwnedArticle | null>(null);
 
-  // Get trade proposals for the current league that involve our articles (incoming pending)
-  const leagueProposals = proposals.filter(p => 
-    p.leagueId === currentLeague.id && p.status === "pending" && p.type === "incoming"
+  // Get trade notifications for the current league that involve our articles (incoming pending)
+  const leagueProposals = notifications.filter(n => 
+    n.leagueId === currentLeague.id && n.type === "trade" && n.tradeData?.direction === "incoming" && n.tradeData?.status === "pending"
   );
 
   // Get article names that have pending trade proposals (requested from us)
   const articlesWithTrades = new Set(
-    leagueProposals.map(p => p.requestedArticle.title.toLowerCase())
+    leagueProposals.map(n => n.tradeData!.requestedArticle.title.toLowerCase())
   );
 
   // Filter articles for this league that are either expiring soon (<=3 days) or have trade proposals
@@ -144,9 +144,10 @@ export const OwnedArticles = ({ onBuyArticles }: OwnedArticlesProps) => {
 
   // Find linked trade proposal for an article
   const getLinkedProposal = (articleName: string) => {
-    return leagueProposals.find(p => 
-      p.requestedArticle.title.toLowerCase() === articleName.toLowerCase()
+    const n = leagueProposals.find(p => 
+      p.tradeData!.requestedArticle.title.toLowerCase() === articleName.toLowerCase()
     );
+    return n?.tradeData;
   };
 
   const linkedProposal = selectedArticle ? getLinkedProposal(selectedArticle.name) : null;

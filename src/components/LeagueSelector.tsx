@@ -7,14 +7,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useLeague, leagues } from "@/contexts/LeagueContext";
-import { useTradeProposals } from "@/contexts/TradeProposalsContext";
+import { useNotifications } from "@/contexts/NotificationsContext";
 
 export function LeagueSelector() {
   const { currentLeague, setCurrentLeague } = useLeague();
-  const { getTotalPendingCount, getPendingCountByLeague, getLeaguesWithPending } = useTradeProposals();
+  const { getTotalUnreadCount, getUnreadCountByLeague, getLeaguesWithUnread } = useNotifications();
 
-  const totalPendingCount = getTotalPendingCount();
-  const leaguesWithPending = getLeaguesWithPending();
+  const totalPendingCount = getTotalUnreadCount();
+  const leaguesWithPending = getLeaguesWithUnread();
 
   return (
     <DropdownMenu>
@@ -37,7 +37,7 @@ export function LeagueSelector() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         {leagues.map((league) => {
-          const pendingCount = getPendingCountByLeague(league.id);
+          const pendingCount = getUnreadCountByLeague(league.id);
           const hasPending = pendingCount > 0;
           
           return (

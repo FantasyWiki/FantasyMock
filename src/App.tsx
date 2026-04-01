@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LeagueProvider } from "@/contexts/LeagueContext";
-import { TradeProposalsProvider } from "@/contexts/TradeProposalsContext";
+import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Market from "./pages/Market";
@@ -23,7 +23,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <LeagueProvider>
-        <TradeProposalsProvider>
+        <NotificationsProvider>
           <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -41,7 +41,7 @@ const App = () => (
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
-        </TradeProposalsProvider>
+        </NotificationsProvider>
       </LeagueProvider>
     </ThemeProvider>
   </QueryClientProvider>

@@ -5,7 +5,7 @@ import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { OwnedArticles } from "@/components/dashboard/OwnedArticles";
 import { LeagueLeaderboard } from "@/components/dashboard/LeagueLeaderboard";
 import { TeamPortfolio } from "@/components/dashboard/TeamPortfolio";
-import { TradeInbox } from "@/components/market/TradeInbox";
+import { NotificationInbox } from "@/components/NotificationInbox";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Plus } from "lucide-react";
 
@@ -28,7 +28,7 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <TradeInbox />
+            <NotificationInbox />
             <Button
               onClick={() => navigate("/market")}
               className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
