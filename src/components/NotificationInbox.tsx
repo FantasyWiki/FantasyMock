@@ -272,53 +272,16 @@ export const NotificationInbox = () => {
           </SheetDescription>
         </SheetHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="all" className="relative text-xs">
-              All
-              {unreadCount > 0 && (
-                <Badge className="ml-1 h-4 w-4 p-0 flex items-center justify-center bg-destructive text-destructive-foreground text-[10px]">
-                  {unreadCount}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="trades" className="relative text-xs">
-              Trades
-              {tradeCount > 0 && (
-                <Badge className="ml-1 h-4 w-4 p-0 flex items-center justify-center bg-destructive text-destructive-foreground text-[10px]">
-                  {tradeCount}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="contracts" className="text-xs">
-              Contracts
-              {contractCount > 0 && (
-                <Badge className="ml-1 h-4 w-4 p-0 flex items-center justify-center bg-destructive text-destructive-foreground text-[10px]">
-                  {contractCount}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="leagues" className="text-xs">
-              Leagues
-              {leagueCount > 0 && (
-                <Badge className="ml-1 h-4 w-4 p-0 flex items-center justify-center bg-destructive text-destructive-foreground text-[10px]">
-                  {leagueCount}
-                </Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value={activeTab} className="mt-4 space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto">
-            {sortedNotifications.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Bell className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>No {activeTab === "all" ? "" : activeTab + " "}notifications</p>
-              </div>
-            ) : (
-              sortedNotifications.map(n => renderNotificationCard(n))
-            )}
-          </TabsContent>
-        </Tabs>
+        <div className="mt-6 space-y-3 max-h-[calc(100vh-220px)] overflow-y-auto">
+          {sortedNotifications.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Bell className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p>No notifications</p>
+            </div>
+          ) : (
+            sortedNotifications.map(n => renderNotificationCard(n))
+          )}
+        </div>
       </SheetContent>
     </Sheet>
   );
