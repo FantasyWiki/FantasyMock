@@ -5,7 +5,7 @@ import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { OwnedArticles } from "@/components/dashboard/OwnedArticles";
 import { LeagueLeaderboard } from "@/components/dashboard/LeagueLeaderboard";
 import { TeamPortfolio } from "@/components/dashboard/TeamPortfolio";
-import { TradeInbox } from "@/components/market/TradeInbox";
+import { NotificationInbox } from "@/components/NotificationInbox";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Plus } from "lucide-react";
 
