@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useLeague, leagues } from "@/contexts/LeagueContext";
-import { useTradeProposals } from "@/contexts/TradeProposalsContext";
+import { useNotifications } from "@/contexts/NotificationsContext";
 
 export function LeagueSelector() {
   const { currentLeague, setCurrentLeague } = useLeague();
