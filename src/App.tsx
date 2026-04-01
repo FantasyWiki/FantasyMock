@@ -23,7 +23,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <LeagueProvider>
-        <TradeProposalsProvider>
+        <NotificationsProvider>
           <TooltipProvider>
           <Toaster />
           <Sonner />
