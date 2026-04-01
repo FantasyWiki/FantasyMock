@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, TrendingUp, TrendingDown, Clock, ArrowRightLeft, Coins, Link2 } from "lucide-react";
+import { Calendar, TrendingUp, TrendingDown, Clock, ArrowRightLeft, Coins, Link2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NeighborChemistry, getChemistryLabel, getChemistryColor, calculateChemistry, getArticleNeighbors } from "@/lib/chemistry";
 
@@ -52,6 +52,15 @@ export function ArticleContractDetailDialog({ article, onClose, onSwap, allArtic
       <DialogContent className="max-w-md mx-4 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">{article.name}</DialogTitle>
+          <a
+            href={`https://en.wikipedia.org/wiki/${encodeURIComponent(article.name.replace(/ /g, '_'))}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+          >
+            <ExternalLink className="h-3 w-3" />
+            View on Wikipedia
+          </a>
         </DialogHeader>
 
         <div className="space-y-4">
