@@ -37,7 +37,7 @@ export function LeagueSelector() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         {leagues.map((league) => {
-          const pendingCount = getPendingCountByLeague(league.id);
+          const pendingCount = getUnreadCountByLeague(league.id);
           const hasPending = pendingCount > 0;
           
           return (

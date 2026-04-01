@@ -144,9 +144,10 @@ export const OwnedArticles = ({ onBuyArticles }: OwnedArticlesProps) => {
 
   // Find linked trade proposal for an article
   const getLinkedProposal = (articleName: string) => {
-    return leagueProposals.find(p => 
-      p.requestedArticle.title.toLowerCase() === articleName.toLowerCase()
+    const n = leagueProposals.find(p => 
+      p.tradeData!.requestedArticle.title.toLowerCase() === articleName.toLowerCase()
     );
+    return n?.tradeData;
   };
 
   const linkedProposal = selectedArticle ? getLinkedProposal(selectedArticle.name) : null;
