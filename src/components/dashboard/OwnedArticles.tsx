@@ -123,7 +123,7 @@ const getTierBadge = (tier: string) => {
 
 export const OwnedArticles = ({ onBuyArticles }: OwnedArticlesProps) => {
   const { currentLeague } = useLeague();
-  const { proposals } = useTradeProposals();
+  const { notifications } = useNotifications();
   const [selectedArticle, setSelectedArticle] = useState<OwnedArticle | null>(null);
 
   // Get trade proposals for the current league that involve our articles (incoming pending)
