@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, TrendingUp, TrendingDown, Clock, ArrowRightLeft, Coins, Link2 } from "lucide-react";
+import { Calendar, TrendingUp, TrendingDown, Clock, ArrowRightLeft, Coins, Link2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NeighborChemistry, getChemistryLabel, getChemistryColor, calculateChemistry, getArticleNeighbors } from "@/lib/chemistry";
 
