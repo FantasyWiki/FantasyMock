@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Separator } from "@/components/ui/separator";
 import { FileText, TrendingUp, TrendingDown, Clock, RotateCcw, AlertTriangle, ArrowRightLeft, Coins, Calendar, Plus, CheckCircle, XCircle } from "lucide-react";
 import { useLeague } from "@/contexts/LeagueContext";
-import { useTradeProposals } from "@/contexts/TradeProposalsContext";
+import { useNotifications } from "@/contexts/NotificationsContext";
 
 interface OwnedArticlesProps {
   onBuyArticles?: () => void;
