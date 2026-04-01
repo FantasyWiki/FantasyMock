@@ -57,13 +57,6 @@ const getNotificationIcon = (type: Notification["type"]) => {
   }
 };
 
-const getCategoryForType = (type: Notification["type"]): string => {
-  if (type === "trade" || type === "trade_accepted" || type === "trade_rejected") return "trades";
-  if (type === "contract_expiring" || type === "contract_expired") return "contracts";
-  if (type === "league_starting" || type === "league_ending") return "leagues";
-  return "all";
-};
-
 export const NotificationInbox = () => {
   const { currentLeague } = useLeague();
   const {
@@ -76,23 +69,13 @@ export const NotificationInbox = () => {
     handleTradeReject,
     handleTradeCancel,
   } = useNotifications();
-  const [activeTab, setActiveTab] = useState("all");
 
   const leagueNotifications = getByLeague(currentLeague.id);
   const unreadCount = getUnreadCountByLeague(currentLeague.id);
 
-  const filteredNotifications =
-    activeTab === "all"
-      ? leagueNotifications
-      : leagueNotifications.filter(n => getCategoryForType(n.type) === activeTab);
-
-  const sortedNotifications = [...filteredNotifications].sort(
+  const sortedNotifications = [...leagueNotifications].sort(
     (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
   );
-
-  const tradeCount = leagueNotifications.filter(n => getCategoryForType(n.type) === "trades" && !n.read).length;
-  const contractCount = leagueNotifications.filter(n => getCategoryForType(n.type) === "contracts" && !n.read).length;
-  const leagueCount = leagueNotifications.filter(n => getCategoryForType(n.type) === "leagues" && !n.read).length;
 
   const onAcceptTrade = (id: number) => {
     handleTradeAccept(id);
