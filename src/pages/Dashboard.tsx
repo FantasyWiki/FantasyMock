@@ -28,7 +28,7 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <TradeInbox />
+            <NotificationInbox />
             <Button
               onClick={() => navigate("/market")}
               className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2"

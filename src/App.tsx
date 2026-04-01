@@ -41,7 +41,7 @@ const App = () => (
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
-        </TradeProposalsProvider>
+        </NotificationsProvider>
       </LeagueProvider>
     </ThemeProvider>
   </QueryClientProvider>

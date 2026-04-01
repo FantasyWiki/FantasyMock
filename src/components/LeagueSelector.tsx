@@ -11,10 +11,10 @@ import { useNotifications } from "@/contexts/NotificationsContext";
 
 export function LeagueSelector() {
   const { currentLeague, setCurrentLeague } = useLeague();
-  const { getTotalPendingCount, getPendingCountByLeague, getLeaguesWithPending } = useTradeProposals();
+  const { getTotalUnreadCount, getUnreadCountByLeague, getLeaguesWithUnread } = useNotifications();
 
-  const totalPendingCount = getTotalPendingCount();
-  const leaguesWithPending = getLeaguesWithPending();
+  const totalPendingCount = getTotalUnreadCount();
+  const leaguesWithPending = getLeaguesWithUnread();
 
   return (
     <DropdownMenu>

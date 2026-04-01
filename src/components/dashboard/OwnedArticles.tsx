@@ -126,14 +126,14 @@ export const OwnedArticles = ({ onBuyArticles }: OwnedArticlesProps) => {
   const { notifications } = useNotifications();
   const [selectedArticle, setSelectedArticle] = useState<OwnedArticle | null>(null);
 
-  // Get trade proposals for the current league that involve our articles (incoming pending)
-  const leagueProposals = proposals.filter(p => 
-    p.leagueId === currentLeague.id && p.status === "pending" && p.type === "incoming"
+  // Get trade notifications for the current league that involve our articles (incoming pending)
+  const leagueProposals = notifications.filter(n => 
+    n.leagueId === currentLeague.id && n.type === "trade" && n.tradeData?.direction === "incoming" && n.tradeData?.status === "pending"
   );
 
   // Get article names that have pending trade proposals (requested from us)
   const articlesWithTrades = new Set(
-    leagueProposals.map(p => p.requestedArticle.title.toLowerCase())
+    leagueProposals.map(n => n.tradeData!.requestedArticle.title.toLowerCase())
   );
 
   // Filter articles for this league that are either expiring soon (<=3 days) or have trade proposals
